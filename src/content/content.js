@@ -6,7 +6,7 @@ let commentObserver = null;
 function createBanner() {
   const banner = document.createElement('div');
   banner.id = 'smart-comment-banner';
-  banner.textContent = 'Smart Comment Assistant is active';
+  banner.textContent = isExtensionActive ? 'Smart Comment Assistant is active' : 'Smart Comment Assistant is inactive';
   return banner;
 }
 
@@ -25,6 +25,9 @@ function showBanner() {
     document.documentElement.style.marginTop = '36px';
     // Force a reflow before adding the visible class
     banner.offsetHeight;
+  } else {
+    // Update banner text to match current state
+    banner.textContent = isExtensionActive ? 'Smart Comment Assistant is active' : 'Smart Comment Assistant is inactive';
   }
   banner.classList.add('visible');
 }
