@@ -24,59 +24,19 @@ async function initializeLLMService() {
   }
 }
 
-// Create banner element
-function createBanner() {
-  const banner = document.createElement('div');
-  banner.id = 'smart-comment-banner';
-  banner.textContent = isExtensionActive ? 'Smart Comment Assistant is active' : 'Smart Comment Assistant is inactive';
-  return banner;
-}
-
-// Show banner
-function showBanner() {
-  let banner = document.getElementById('smart-comment-banner');
-  if (!banner) {
-    banner = createBanner();
-    // Insert banner as the first element in the body
-    if (document.body.firstChild) {
-      document.body.insertBefore(banner, document.body.firstChild);
-    } else {
-      document.body.appendChild(banner);
-    }
-    // Add margin to prevent content jump
-    document.documentElement.style.marginTop = '36px';
-    // Force a reflow before adding the visible class
-    banner.offsetHeight;
-  } else {
-    // Update banner text to match current state
-    banner.textContent = isExtensionActive ? 'Smart Comment Assistant is active' : 'Smart Comment Assistant is inactive';
-  }
-  banner.classList.add('visible');
-}
-
-// Hide banner
-function hideBanner() {
-  const banner = document.getElementById('smart-comment-banner');
-  if (banner) {
-    banner.classList.remove('visible');
-    // Remove banner and reset margin after transition
-    setTimeout(() => {
-      banner.remove();
-      document.documentElement.style.marginTop = '';
-    }, 300);
-  }
-}
-
 // Create panel element
 function createPanel() {
   const panel = document.createElement('div');
   panel.id = 'smart-comment-panel';
   panel.className = 'smart-comment-panel';
 
-  // Add header
+  // Add header with status
   const header = document.createElement('div');
   header.className = 'panel-header';
-  header.textContent = 'Smart Comment Assistant';
+  header.innerHTML = `
+    Smart Comment Assistant
+    <span class="panel-status">${isExtensionActive ? '(Active)' : '(Inactive)'}</span>
+  `;
   panel.appendChild(header);
 
   // Add content container
@@ -266,9 +226,6 @@ function createClickHandler(element) {
 
 // Clean up all extension features
 function cleanupExtensionFeatures() {
-  // Hide banner
-  hideBanner();
-
   // Hide panel
   hidePanel();
 
@@ -522,6 +479,17 @@ function setupContentsObserver() {
   }
 }
 
+// Update panel status
+function updatePanelStatus() {
+  const panel = document.getElementById('smart-comment-panel');
+  if (panel) {
+    const status = panel.querySelector('.panel-status');
+    if (status) {
+      status.textContent = isExtensionActive ? '(Active)' : '(Inactive)';
+    }
+  }
+}
+
 // Handle state changes
 async function handleStateChange(activated) {
   // Update state first
@@ -529,7 +497,6 @@ async function handleStateChange(activated) {
 
   if (activated) {
     // Initialize extension features
-    showBanner();
     showPanel();
     await initializeLLMService();
     setTimeout(() => {
@@ -538,9 +505,11 @@ async function handleStateChange(activated) {
   } else {
     // Clean up all extension features
     cleanupExtensionFeatures();
-    hidePanel();
     llmService = null;
   }
+
+  // Update panel status
+  updatePanelStatus();
 }
 
 // Listen for state changes from background script

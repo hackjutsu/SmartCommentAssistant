@@ -95,27 +95,21 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
 /* Right panel styles */
 .smart-comment-panel {
   position: fixed !important;
-  top: 36px !important; /* Start below the banner */
+  top: 0 !important;
   right: 0 !important;
   width: 320px !important;
-  height: calc(100vh - 36px) !important; /* Adjust height to account for banner */
+  height: 100vh !important;
   background: white !important;
   box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1) !important;
-  z-index: 9999998 !important; /* One less than banner */
+  z-index: 9999998 !important;
   transform: translateX(100%) !important;
-  transition: transform 0.3s ease, top 0.3s ease, height 0.3s ease !important;
+  transition: transform 0.3s ease !important;
   display: flex !important;
   flex-direction: column !important;
 }
 
 .smart-comment-panel.visible {
   transform: translateX(0) !important;
-}
-
-/* When banner is not visible, panel should take full height */
-#smart-comment-banner:not(.visible) ~ .smart-comment-panel {
-  top: 0 !important;
-  height: 100vh !important;
 }
 
 .panel-header {
@@ -125,6 +119,15 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
   font-size: 16px !important;
   font-weight: 500 !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.panel-status {
+  font-size: 14px !important;
+  font-weight: normal !important;
+  opacity: 0.9 !important;
 }
 
 .panel-content {
