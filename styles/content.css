@@ -1,37 +1,95 @@
 /* Banner styles */
 #smart-comment-banner {
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%) translateY(-100%);
-  background-color: #2196F3;
-  color: white;
-  padding: 8px 16px;
-  border-radius: 0 0 4px 4px;
-  font-size: 14px;
-  font-weight: 500;
-  z-index: 9999;
-  transition: transform 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 36px !important;
+  background-color: #2196F3 !important;
+  color: white !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  z-index: 9999999 !important; /* Ensure it's above all YouTube elements */
+  text-align: center !important;
+  line-height: 36px !important;
+  transform: translateY(-100%) !important;
+  transition: transform 0.3s ease !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
 }
 
 #smart-comment-banner.visible {
-  transform: translateX(-50%) translateY(0);
+  transform: translateY(0) !important;
 }
 
-/* Styles for selectable comments */
-.ytd-comment-thread-renderer.selectable {
-  position: relative;
-  cursor: pointer;
-  transition: background-color 0.2s;
+/* When banner is hidden, remove the margin */
+html[style*="margin-top"] #smart-comment-banner:not(.visible) {
+  display: none !important;
 }
 
-.ytd-comment-thread-renderer.selectable:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+/* Adjust YouTube's header when banner is visible */
+html[style*="margin-top"] #masthead-container {
+  top: 36px !important;
 }
 
-.ytd-comment-thread-renderer.selected {
-  background-color: rgba(33, 150, 243, 0.1);
+/* Comment selection styles - Main comments */
+ytd-comment-thread-renderer.style-scope ytd-comment-view-model.selectable {
+  position: relative !important;
+  cursor: pointer !important;
+  display: block !important;
+  margin: 16px 0 !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* Comment selection styles - Replies */
+ytd-comment-view-model.style-scope.ytd-comment-replies-renderer.selectable {
+  position: relative !important;
+  cursor: pointer !important;
+  display: block !important;
+  margin: 8px 0 !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+/* Hover effects for both main comments and replies */
+ytd-comment-view-model.selectable:hover,
+ytd-comment-view-model.selectable:hover #comment,
+ytd-comment-view-model.selectable #comment:hover {
+  background-color: rgba(33, 150, 243, 0.08) !important;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2) !important;
+}
+
+/* Selected state for both main comments and replies */
+ytd-comment-view-model.selected,
+ytd-comment-view-model.selected #comment {
+  background-color: rgba(33, 150, 243, 0.12) !important;
+  box-shadow: 0 0 0 2px #2196F3 !important;
+}
+
+/* Ensure the comment content remains clickable */
+ytd-comment-view-model.selectable #content,
+ytd-comment-view-model.selectable #main {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Make sure the hover effect works on the entire comment area */
+ytd-comment-view-model.selectable > *:not(#content):not(#main):not(a):not(button) {
+  pointer-events: none !important;
+}
+
+/* Keep links and buttons clickable */
+ytd-comment-view-model.selectable a,
+ytd-comment-view-model.selectable button,
+ytd-comment-view-model.selectable yt-button-shape,
+ytd-comment-view-model.selectable tp-yt-paper-button {
+  pointer-events: auto !important;
 }
 
 /* Right panel styles */
