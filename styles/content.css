@@ -1,3 +1,24 @@
+/* Banner styles */
+#smart-comment-banner {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  background-color: #2196F3;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 0 0 4px 4px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#smart-comment-banner.visible {
+  transform: translateX(-50%) translateY(0);
+}
+
 /* Styles for selectable comments */
 .ytd-comment-thread-renderer.selectable {
   position: relative;

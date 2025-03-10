@@ -6,8 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialize state
   chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
-    toggleSwitch.checked = response.isActivated;
-    updateStatusText(response.isActivated);
+    console.log('Popup received initial state:', response);
+    if (response) {
+      toggleSwitch.checked = response.isActivated;
+      updateStatusText(response.isActivated);
+    }
   });
 
   // Load saved API key
@@ -19,8 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle toggle switch
   toggleSwitch.addEventListener('change', () => {
+    console.log('Toggle switch changed:', toggleSwitch.checked);
     chrome.runtime.sendMessage({ type: 'TOGGLE_STATE' }, (response) => {
-      updateStatusText(response.isActivated);
+      console.log('Toggle response:', response);
+      if (response) {
+        updateStatusText(response.isActivated);
+      }
     });
   });
 
