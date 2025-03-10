@@ -58,6 +58,7 @@ function handleCommentSelection(commentElement) {
   commentElement.classList.add('selected');
 
   // Scroll the comment into view if it's not fully visible
+  // FIXME: this is not working
   commentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -159,65 +160,129 @@ function processComments() {
 // Initialize comment selection
 function initializeCommentSelection() {
   if (!isExtensionActive) return;
-
   console.log('Initializing comment selection');
 
-  // Wait for comments to load
-  const waitForComments = setInterval(() => {
+  // First, set up an observer for the primary div to detect when comments section is added
+  const primaryObserver = new MutationObserver((mutations) => {
+    mutations.forEach(mutation => {
+      if (mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach(node => {
+          if (node.tagName === 'YTD-COMMENTS') {
+            console.log('Comments section added');
+            // Once comments are added, watch for sections
+            watchForSections(node);
+            // We can disconnect this observer as we don't need it anymore
+            primaryObserver.disconnect();
+          }
+        });
+      }
+    });
+  });
+
+  // Find the primary div
+  const primaryDiv = document.querySelector('#primary');
+  if (primaryDiv) {
+    // Check if comments already exists
+    const existingComments = primaryDiv.querySelector('ytd-comments');
+    if (existingComments) {
+      console.log('Comments section already exists');
+      watchForSections(existingComments);
+    } else {
+      console.log('Waiting for comments section to be added');
+      primaryObserver.observe(primaryDiv, {
+        childList: true,
+        subtree: false
+      });
+    }
+  } else {
+    console.log('Primary div not found');
+  }
+}
+
+// Watch for sections being added to comments
+function watchForSections(commentsElement) {
+  const sectionsObserver = new MutationObserver((mutations) => {
+    mutations.forEach(mutation => {
+      if (mutation.addedNodes.length > 0) {
+        mutation.addedNodes.forEach(node => {
+          if (node.id === 'sections') {
+            console.log('Comments section renderer added');
+            // Once sections are added, set up the contents observer
+            setupContentsObserver();
+            // We can disconnect this observer as we don't need it anymore
+            sectionsObserver.disconnect();
+          }
+        });
+      }
+    });
+  });
+
+  // Check if sections already exists
+  if (commentsElement.querySelector('#sections')) {
+    console.log('Comments section renderer already exists');
+    setupContentsObserver();
+  } else {
+    console.log('Waiting for comments section renderer to be added');
+    sectionsObserver.observe(commentsElement, {
+      childList: true,
+      subtree: false
+    });
+  }
+}
+
+// Set up observer for contents
+function setupContentsObserver() {
+  // Process existing comments first
+  processComments();
+
+  // Set up observer for the comments contents div
+  commentObserver = new MutationObserver((mutations) => {
     if (!isExtensionActive) {
-      clearInterval(waitForComments);
+      commentObserver.disconnect();
       return;
     }
 
-    if (processComments()) {
-      clearInterval(waitForComments);
+    mutations.forEach(mutation => {
+      // Only process if new nodes were added
+      if (mutation.addedNodes.length > 0) {
+        // Check if we're observing the correct contents div
+        const target = mutation.target;
+        if (target.id === 'contents' &&
+            target.parentElement.id === 'sections' &&
+            target.closest('ytd-comments#comments')) {
+          console.log('New content added to comments section');
+          // Process only the newly added comment threads
+          mutation.addedNodes.forEach(node => {
+            if (node.nodeName === 'YTD-COMMENT-THREAD-RENDERER') {
+              console.log('Processing new comment thread');
+              const mainComment = node.querySelector('ytd-comment-view-model#comment');
+              if (mainComment) {
+                makeCommentSelectable(mainComment);
+              }
 
-      // Set up observer for dynamic comment loading
-      commentObserver = new MutationObserver((mutations) => {
-        if (!isExtensionActive) {
-          commentObserver.disconnect();
-          return;
-        }
-
-        let shouldProcess = false;
-        mutations.forEach((mutation) => {
-          mutation.addedNodes.forEach((node) => {
-            if (node.nodeName === 'YTD-COMMENT-THREAD-RENDERER' ||
-                node.nodeName === 'YTD-COMMENT-RENDERER' ||
-                node.nodeName === 'YTD-COMMENT-REPLIES-RENDERER') {
-              shouldProcess = true;
+              const repliesSection = node.querySelector('ytd-comment-replies-renderer');
+              if (repliesSection) {
+                const replies = repliesSection.querySelectorAll('ytd-comment-view-model.style-scope.ytd-comment-replies-renderer');
+                replies.forEach(reply => makeCommentSelectable(reply));
+              }
             }
           });
-        });
-
-        if (shouldProcess) {
-          console.log('New comments or replies detected, processing...');
-          setTimeout(processComments, 500); // Add a small delay to ensure content is loaded
         }
-      });
-
-      // Start observing the comments section
-      const commentsSection = document.querySelector('ytd-comments');
-      if (commentsSection) {
-        commentObserver.observe(commentsSection, {
-          childList: true,
-          subtree: true,
-          attributes: false,
-          characterData: false
-        });
-        console.log('Started observing comments section');
       }
+    });
+  });
 
-      // Do one more process after a delay to catch any late-loading replies
-      setTimeout(processComments, 2000);
-    }
-  }, 1000);
-
-  // Clear interval after 10 seconds
-  setTimeout(() => {
-    clearInterval(waitForComments);
-    console.log('Comment initialization timeout');
-  }, 10000);
+  // Find and observe the comments contents div using the full hierarchy
+  const contentsDiv = document.querySelector('#content #page-manager #primary ytd-comments#comments ytd-item-section-renderer#sections #contents');
+  if (contentsDiv) {
+    commentObserver.observe(contentsDiv, {
+      childList: true,
+      subtree: true
+    });
+    console.log('Started observing comments contents div');
+  } else {
+    console.log('Could not find comments contents div');
+  }
 }
 
 // Handle state changes
@@ -231,10 +296,11 @@ function handleStateChange(activated) {
     // Initialize extension features
     showBanner();
     console.log('Banner shown');
-    // Small delay to ensure banner is shown before initializing comments
+    // Wait for 2 seconds to ensure DOM is built
+    console.log('Waiting 2 seconds for DOM to be ready...');
     setTimeout(() => {
       initializeCommentSelection();
-    }, 100);
+    }, 2000);
   } else {
     // Clean up all extension features
     cleanupExtensionFeatures();
