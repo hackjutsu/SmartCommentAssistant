@@ -40,8 +40,8 @@ ytd-comment-thread-renderer.style-scope ytd-comment-view-model.selectable {
   position: relative !important;
   cursor: pointer !important;
   display: block !important;
-  margin: 16px 0 !important;
-  padding: 8px !important;
+  margin: 4px 0 !important;
+  padding: 4px !important;
   border-radius: 8px !important;
   transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
 }
@@ -51,8 +51,8 @@ ytd-comment-view-model.style-scope.ytd-comment-replies-renderer.selectable {
   position: relative !important;
   cursor: pointer !important;
   display: block !important;
-  margin: 8px 0 !important;
-  padding: 8px !important;
+  margin: 2px 0 !important;
+  padding: 4px !important;
   border-radius: 8px !important;
   transition: background-color 0.2s ease, box-shadow 0.2s ease !important;
 }
