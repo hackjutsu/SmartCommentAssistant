@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Comment Assistant</title>
+  <link rel="stylesheet" href="../../styles/popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Smart Comment Assistant</h1>
+
+    <div class="status-section">
+      <label class="switch">
+        <input type="checkbox" id="toggleExtension">
+        <span class="slider round"></span>
+      </label>
+      <span id="statusText">Extension is active</span>
+    </div>
+
+    <div class="api-key-section">
+      <h2>OpenAI API Key</h2>
+      <input type="password" id="apiKey" placeholder="Enter your OpenAI API key">
+      <button id="saveApiKey">Save</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>
