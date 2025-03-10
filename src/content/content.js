@@ -39,11 +39,30 @@ async function initializeLLMService() {
     if (saveButton) {
       saveButton.disabled = serviceType === 'mock';
     }
+
+    // Update generate button state after initialization
+    updateGenerateButtonState();
   } catch (error) {
     console.error('Failed to initialize LLM service:', error);
     // Fall back to mock service
     if (LLMServiceFactory) {
       llmService = LLMServiceFactory.createService('mock');
+      // Update UI to reflect fallback to mock service
+      const serviceSelect = document.querySelector('.service-select');
+      const apiKeyInput = document.querySelector('.service-api-key');
+      const saveButton = document.querySelector('.save-api-key');
+
+      if (serviceSelect) {
+        serviceSelect.value = 'mock';
+      }
+      if (apiKeyInput) {
+        apiKeyInput.disabled = true;
+      }
+      if (saveButton) {
+        saveButton.disabled = true;
+      }
+      // Update generate button state for mock service
+      updateGenerateButtonState();
     }
   }
 }
@@ -176,6 +195,7 @@ function createPanel() {
   // Add event listeners for service controls
   const serviceSelect = panel.querySelector('.service-select');
   const saveApiKeyButton = panel.querySelector('.save-api-key');
+  const apiKeyInput = panel.querySelector('.service-api-key');
 
   if (serviceSelect) {
     serviceSelect.addEventListener('change', handleServiceChange);
@@ -184,6 +204,13 @@ function createPanel() {
   if (saveApiKeyButton) {
     saveApiKeyButton.addEventListener('click', handleSaveApiKey);
   }
+
+  if (apiKeyInput) {
+    apiKeyInput.addEventListener('input', updateGenerateButtonState);
+  }
+
+  // Initialize generate button state
+  updateGenerateButtonState();
 
   return panel;
 }
@@ -243,7 +270,6 @@ function updatePanelContent(commentElement) {
   const commentDetails = selectedComment.querySelector('.comment-details');
   const authorElement = commentDetails.querySelector('.comment-author');
   const textElement = commentDetails.querySelector('.comment-text');
-  const generateButton = panel.querySelector('.generate-button');
 
   // Get comment details
   const authorName = commentElement.querySelector('#author-text').textContent.trim();
@@ -257,17 +283,14 @@ function updatePanelContent(commentElement) {
     // Update comment details
     authorElement.textContent = authorName;
     textElement.textContent = commentText;
-
-    // Enable generate button
-    generateButton.disabled = false;
   } else {
     // Show no selection message and hide comment details
     noSelectionMessage.style.display = 'block';
     commentDetails.style.display = 'none';
-
-    // Disable generate button
-    generateButton.disabled = true;
   }
+
+  // Update generate button state
+  updateGenerateButtonState();
 }
 
 // Create click handler with bound context
@@ -661,6 +684,28 @@ async function handleGenerate() {
   }
 }
 
+// Update generate button state based on service type and API key
+function updateGenerateButtonState() {
+  const panel = document.getElementById('smart-comment-panel');
+  if (!panel) return;
+
+  const generateButton = panel.querySelector('.generate-button');
+  const serviceSelect = panel.querySelector('.service-select');
+  const apiKeyInput = panel.querySelector('.service-api-key');
+  const selectedComment = document.querySelector('ytd-comment-view-model.selected');
+
+  if (!generateButton || !serviceSelect || !apiKeyInput) return;
+
+  const serviceType = serviceSelect.value;
+  const apiKey = apiKeyInput.value.trim();
+
+  // Disable button if:
+  // 1. No comment is selected OR
+  // 2. Using non-mock service without API key
+  const shouldDisable = !selectedComment || (serviceType !== 'mock' && !apiKey);
+  generateButton.disabled = shouldDisable;
+}
+
 // Handle service selection change
 async function handleServiceChange(event) {
   const serviceType = event.target.value;
@@ -679,6 +724,8 @@ async function handleServiceChange(event) {
     if (apiKey && serviceType !== 'mock') {
       await chrome.storage.sync.set({ apiKey });
     }
+    // Update generate button state after service change
+    updateGenerateButtonState();
   } catch (error) {
     console.error('Failed to initialize service:', error);
     alert('Failed to initialize service. Please try again.');
@@ -703,6 +750,8 @@ async function handleSaveApiKey() {
     // Reinitialize service with new key
     llmService = LLMServiceFactory.createService(serviceType, { apiKey });
     alert('API key saved successfully');
+    // Update generate button state after saving API key
+    updateGenerateButtonState();
   } catch (error) {
     console.error('Failed to save API key:', error);
     alert('Failed to save API key. Please try again.');
