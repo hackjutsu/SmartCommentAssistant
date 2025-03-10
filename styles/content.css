@@ -133,6 +133,7 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
   overflow-y: auto !important;
   background-color: white !important;
   font-family: Roboto, Arial, sans-serif !important;
+  box-sizing: border-box !important;
 }
 
 /* Adjust main content when panel is visible */
@@ -148,6 +149,7 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
   background: #f8f9fa !important;
   border-radius: 8px !important;
   margin-bottom: 16px !important;
+  box-sizing: border-box !important;
 }
 
 .no-selection-message {
@@ -177,4 +179,101 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
   font-family: Roboto, Arial, sans-serif !important;
   -webkit-text-size-adjust: 100% !important;
   -webkit-font-smoothing: antialiased !important;
+}
+
+/* Style Selection Section */
+.style-selection {
+  margin: 24px 0 !important;
+}
+
+.style-selection h3 {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #030303 !important;
+  margin-bottom: 12px !important;
+}
+
+.style-options {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.style-button {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 12px !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 8px !important;
+  background: white !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  transition: all 0.2s ease !important;
+}
+
+.style-button:hover {
+  background: #f8f9fa !important;
+  border-color: #2196F3 !important;
+}
+
+.style-button.selected {
+  background: #e3f2fd !important;
+  border-color: #2196F3 !important;
+}
+
+.style-icon {
+  font-size: 18px !important;
+  line-height: 1 !important;
+}
+
+.style-label {
+  font-size: 14px !important;
+  color: #030303 !important;
+}
+
+/* Prompt Section */
+.prompt-section {
+  margin: 24px 0 !important;
+}
+
+.prompt-section h3 {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #030303 !important;
+  margin-bottom: 12px !important;
+}
+
+.prompt-input {
+  width: 100% !important;
+  padding: 8px 12px !important;
+  border: 1px solid #c4c4c4 !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  line-height: 20px !important;
+  resize: vertical !important;
+  min-height: 80px !important;
+  max-height: 300px !important;
+  font-family: Roboto, Arial, sans-serif !important;
+  color: #0f0f0f !important;
+  background-color: #ffffff !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  display: block !important;
+}
+
+.prompt-input:hover {
+  border-color: #909090 !important;
+}
+
+.prompt-input:focus {
+  outline: none !important;
+  border-color: #065fd4 !important;
+  box-shadow: 0 0 0 1px #065fd4 !important;
+}
+
+.prompt-input::placeholder {
+  color: #606060 !important;
+  font-size: 14px !important;
 }

@@ -51,12 +51,6 @@ function createPanel() {
   panel.id = 'smart-comment-panel';
   panel.className = 'smart-comment-panel';
 
-  // Add header
-  const header = document.createElement('div');
-  header.className = 'panel-header';
-  header.textContent = 'Smart Comment Assistant';
-  panel.appendChild(header);
-
   // Add content container
   const content = document.createElement('div');
   content.className = 'panel-content';
@@ -73,7 +67,49 @@ function createPanel() {
   `;
   content.appendChild(selectedComment);
 
+  // Add style selection section
+  const styleSection = document.createElement('div');
+  styleSection.className = 'style-selection';
+  styleSection.innerHTML = `
+    <h3>Select Comment Style</h3>
+    <div class="style-options">
+      <button class="style-button" data-style="positive">
+        <span class="style-icon">😊</span>
+        <span class="style-label">Positive/Supportive</span>
+      </button>
+      <button class="style-button" data-style="constructive">
+        <span class="style-icon">💡</span>
+        <span class="style-label">Constructive/Thoughtful</span>
+      </button>
+      <button class="style-button" data-style="critical">
+        <span class="style-icon">🤔</span>
+        <span class="style-label">Critical/Negative</span>
+      </button>
+    </div>
+  `;
+  content.appendChild(styleSection);
+
+  // Add custom prompt section
+  const promptSection = document.createElement('div');
+  promptSection.className = 'prompt-section';
+  promptSection.innerHTML = `
+    <h3>Your Initial Comment</h3>
+    <textarea
+      class="prompt-input"
+      placeholder="Enter your initial thoughts or the main points you want to convey..."
+      rows="4"
+    ></textarea>
+  `;
+  content.appendChild(promptSection);
+
   panel.appendChild(content);
+
+  // Add event listener for style selection
+  const styleOptions = panel.querySelector('.style-options');
+  if (styleOptions) {
+    styleOptions.addEventListener('click', handleStyleSelection);
+  }
+
   return panel;
 }
 
@@ -459,3 +495,17 @@ chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
     handleStateChange(response.isActivated);
   }
 });
+
+// Handle style button selection
+function handleStyleSelection(event) {
+  const button = event.target.closest('.style-button');
+  if (!button) return;
+
+  // Remove selection from all buttons
+  document.querySelectorAll('.style-button').forEach(btn => {
+    btn.classList.remove('selected');
+  });
+
+  // Add selection to clicked button
+  button.classList.add('selected');
+}
