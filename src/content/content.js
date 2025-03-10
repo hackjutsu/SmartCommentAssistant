@@ -51,11 +51,29 @@ function createPanel() {
   panel.id = 'smart-comment-panel';
   panel.className = 'smart-comment-panel';
 
+  // Add header
+  const header = document.createElement('div');
+  header.className = 'panel-header';
+  header.textContent = 'Smart Comment Assistant';
+  panel.appendChild(header);
+
   // Add content container
   const content = document.createElement('div');
   content.className = 'panel-content';
-  panel.appendChild(content);
 
+  // Add selected comment container
+  const selectedComment = document.createElement('div');
+  selectedComment.className = 'selected-comment';
+  selectedComment.innerHTML = `
+    <div class="no-selection-message">No comment selected</div>
+    <div class="comment-details" style="display: none;">
+      <div class="comment-author"></div>
+      <div class="comment-text"></div>
+    </div>
+  `;
+  content.appendChild(selectedComment);
+
+  panel.appendChild(content);
   return panel;
 }
 
@@ -96,9 +114,42 @@ function handleCommentSelection(commentElement) {
   // Add selection to clicked comment
   commentElement.classList.add('selected');
 
+  // Update panel content with selected comment details
+  updatePanelContent(commentElement);
+
   // Scroll the comment into view if it's not fully visible
   // FIXME: this is not working
   commentElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Update panel content with selected comment details
+function updatePanelContent(commentElement) {
+  const panel = document.getElementById('smart-comment-panel');
+  if (!panel) return;
+
+  const selectedComment = panel.querySelector('.selected-comment');
+  const noSelectionMessage = selectedComment.querySelector('.no-selection-message');
+  const commentDetails = selectedComment.querySelector('.comment-details');
+  const authorElement = commentDetails.querySelector('.comment-author');
+  const textElement = commentDetails.querySelector('.comment-text');
+
+  // Get comment details
+  const authorName = commentElement.querySelector('#author-text').textContent.trim();
+  const commentText = commentElement.querySelector('#content-text').textContent.trim();
+
+  if (commentElement) {
+    // Hide no selection message and show comment details
+    noSelectionMessage.style.display = 'none';
+    commentDetails.style.display = 'block';
+
+    // Update comment details
+    authorElement.textContent = authorName;
+    textElement.textContent = commentText;
+  } else {
+    // Show no selection message and hide comment details
+    noSelectionMessage.style.display = 'block';
+    commentDetails.style.display = 'none';
+  }
 }
 
 // Create click handler with bound context

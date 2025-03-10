@@ -131,6 +131,8 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
   flex: 1 !important;
   padding: 16px !important;
   overflow-y: auto !important;
+  background-color: white !important;
+  font-family: Roboto, Arial, sans-serif !important;
 }
 
 /* Adjust main content when panel is visible */
@@ -138,4 +140,41 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
   margin-right: 320px !important;
   width: calc(100% - 320px) !important;
   transition: margin-right 0.3s ease, width 0.3s ease !important;
+}
+
+/* Panel content styles */
+.selected-comment {
+  padding: 16px !important;
+  background: #f8f9fa !important;
+  border-radius: 8px !important;
+  margin-bottom: 16px !important;
+}
+
+.no-selection-message {
+  color: #666 !important;
+  text-align: center !important;
+  font-size: 14px !important;
+  padding: 16px !important;
+}
+
+.comment-details {
+  display: none;
+}
+
+.comment-author {
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  color: #030303 !important;
+  margin-bottom: 8px !important;
+  font-family: Roboto, Arial, sans-serif !important;
+}
+
+.comment-text {
+  font-size: 14px !important;
+  color: #030303 !important;
+  line-height: 1.4 !important;
+  white-space: pre-wrap !important;
+  font-family: Roboto, Arial, sans-serif !important;
+  -webkit-text-size-adjust: 100% !important;
+  -webkit-font-smoothing: antialiased !important;
 }
