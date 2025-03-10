@@ -45,11 +45,47 @@ function hideBanner() {
   }
 }
 
+// Create panel element
+function createPanel() {
+  const panel = document.createElement('div');
+  panel.id = 'smart-comment-panel';
+  panel.className = 'smart-comment-panel';
+
+  // Add content container
+  const content = document.createElement('div');
+  content.className = 'panel-content';
+  panel.appendChild(content);
+
+  return panel;
+}
+
+// Show panel
+function showPanel() {
+  let panel = document.getElementById('smart-comment-panel');
+  if (!panel) {
+    panel = createPanel();
+    document.body.appendChild(panel);
+    // Force a reflow before adding the visible class
+    panel.offsetHeight;
+  }
+  panel.classList.add('visible');
+}
+
+// Hide panel
+function hidePanel() {
+  const panel = document.getElementById('smart-comment-panel');
+  if (panel) {
+    panel.classList.remove('visible');
+    // Remove panel after transition
+    setTimeout(() => {
+      panel.remove();
+    }, 300);
+  }
+}
+
 // Handle comment selection
 function handleCommentSelection(commentElement) {
   if (!isExtensionActive) return;
-
-
 
   // Remove selection from previously selected comment
   const previouslySelected = document.querySelector('ytd-comment-view-model.selected');
@@ -69,10 +105,8 @@ function handleCommentSelection(commentElement) {
 function createClickHandler(element) {
   return function clickHandler(e) {
     if (!isExtensionActive) {
-
       return;
     }
-
 
     e.preventDefault();
     e.stopPropagation();
@@ -82,15 +116,14 @@ function createClickHandler(element) {
 
 // Clean up all extension features
 function cleanupExtensionFeatures() {
-
-
   // Hide banner
   hideBanner();
 
+  // Hide panel
+  hidePanel();
+
   // Remove all comment selection functionality
   const selectableElements = document.querySelectorAll('.selectable, .selected');
-
-
   selectableElements.forEach(element => {
     element.classList.remove('selectable', 'selected');
     const clickHandler = element._clickHandler;
@@ -112,14 +145,12 @@ function cleanupExtensionFeatures() {
   if (commentObserver) {
     commentObserver.disconnect();
     commentObserver = null;
-
   }
 }
 
 // Make comment selectable
 function makeCommentSelectable(element) {
   if (!element || element.classList.contains('selectable')) return;
-
 
   element.classList.add('selectable');
 
@@ -145,12 +176,10 @@ function makeCommentSelectable(element) {
 function processComments() {
   const commentThreads = document.querySelectorAll('ytd-comment-thread-renderer');
 
-
   commentThreads.forEach(thread => {
     // Make main comment selectable
     const mainComment = thread.querySelector('ytd-comment-view-model#comment');
     if (mainComment) {
-
       makeCommentSelectable(mainComment);
     }
 
@@ -172,14 +201,12 @@ function processComments() {
 function initializeCommentSelection() {
   if (!isExtensionActive) return;
 
-
   // First, set up an observer for the primary div to detect when comments section is added
   const primaryObserver = new MutationObserver((mutations) => {
     mutations.forEach(mutation => {
       if (mutation.addedNodes.length > 0) {
         mutation.addedNodes.forEach(node => {
           if (node.tagName === 'YTD-COMMENTS') {
-
             // Once comments are added, watch for sections
             watchForSections(node);
             // We can disconnect this observer as we don't need it anymore
@@ -196,17 +223,14 @@ function initializeCommentSelection() {
     // Check if comments already exists
     const existingComments = primaryDiv.querySelector('ytd-comments');
     if (existingComments) {
-
       watchForSections(existingComments);
     } else {
-
       primaryObserver.observe(primaryDiv, {
         childList: true,
         subtree: false
       });
     }
   } else {
-
   }
 }
 
@@ -217,7 +241,6 @@ function watchForSections(commentsElement) {
       if (mutation.addedNodes.length > 0) {
         mutation.addedNodes.forEach(node => {
           if (node.id === 'sections') {
-
             // Once sections are added, set up the contents observer
             setupContentsObserver();
             // We can disconnect this observer as we don't need it anymore
@@ -230,10 +253,8 @@ function watchForSections(commentsElement) {
 
   // Check if sections already exists
   if (commentsElement.querySelector('#sections')) {
-
     setupContentsObserver();
   } else {
-
     sectionsObserver.observe(commentsElement, {
       childList: true,
       subtree: false
@@ -243,31 +264,22 @@ function watchForSections(commentsElement) {
 
 // Set up observer for replies in a comment thread
 function setupRepliesObserver(threadElement) {
-
-
   // Find or wait for the replies section
   const repliesSection = threadElement.querySelector('ytd-comment-replies-renderer');
   if (repliesSection) {
-
     // Find the expander contents
     const expanderContent = repliesSection.querySelector('#expander #expander-contents #contents');
     if (expanderContent) {
-
       // Set up observer for this specific replies section
       const repliesObserver = new MutationObserver((mutations) => {
-
         mutations.forEach(mutation => {
           if (mutation.addedNodes.length > 0) {
-
             mutation.addedNodes.forEach(node => {
-
               if (node.nodeName === 'YTD-COMMENT-RENDERER') {
                 const replyComment = node.querySelector('ytd-comment-view-model');
                 if (replyComment) {
-
                   makeCommentSelectable(replyComment);
                 } else {
-
                 }
               }
             });
@@ -281,21 +293,17 @@ function setupRepliesObserver(threadElement) {
         subtree: false
       });
 
-
       // Process any existing replies that might already be there
       const existingReplies = expanderContent.querySelectorAll('ytd-comment-renderer ytd-comment-view-model');
       if (existingReplies.length > 0) {
-
         existingReplies.forEach(reply => makeCommentSelectable(reply));
       }
 
       // Store the observer on the element so we can clean it up later
       threadElement._repliesObserver = repliesObserver;
     } else {
-
     }
   } else {
-
   }
 }
 
@@ -333,7 +341,6 @@ function setupContentsObserver() {
               // Process any existing replies
               const repliesSection = node.querySelector('ytd-comment-replies-renderer');
               if (repliesSection) {
-
                 const replies = repliesSection.querySelectorAll('ytd-comment-view-model.style-scope.ytd-comment-replies-renderer');
                 replies.forEach(reply => makeCommentSelectable(reply));
               }
@@ -344,7 +351,6 @@ function setupContentsObserver() {
         // Check if this is a reply being added to an expander
         const expanderContent = target.closest('#expander-contents #contents');
         if (expanderContent) {
-
           mutation.addedNodes.forEach(node => {
             if (node.nodeName === 'YTD-COMMENT-VIEW-MODEL') {
               makeCommentSelectable(node);
@@ -362,39 +368,31 @@ function setupContentsObserver() {
       childList: true,
       subtree: true
     });
-
   } else {
-
   }
 }
 
 // Handle state changes
 function handleStateChange(activated) {
-
-
   // Update state first
   isExtensionActive = activated;
 
   if (activated) {
     // Initialize extension features
     showBanner();
-
-    // Wait for 2 seconds to ensure DOM is built
-
+    showPanel();
     setTimeout(() => {
       initializeCommentSelection();
     }, 2000);
   } else {
     // Clean up all extension features
     cleanupExtensionFeatures();
-
+    hidePanel();
   }
 }
 
 // Listen for state changes from background script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-
-
   if (message.type === 'STATE_CHANGED') {
     handleStateChange(message.isActivated);
     sendResponse({ success: true });
@@ -406,7 +404,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Initialize on page load
 chrome.runtime.sendMessage({ type: 'GET_STATE' }, (response) => {
-
   if (response) {
     handleStateChange(response.isActivated);
   }

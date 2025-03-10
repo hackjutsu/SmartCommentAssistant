@@ -94,19 +94,48 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
 
 /* Right panel styles */
 .smart-comment-panel {
-  position: fixed;
-  top: 0;
-  right: 0;
-  width: 300px;
-  height: 100vh;
-  background: white;
-  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-  padding: 16px;
-  z-index: 9999;
-  transform: translateX(100%);
-  transition: transform 0.3s ease;
+  position: fixed !important;
+  top: 36px !important; /* Start below the banner */
+  right: 0 !important;
+  width: 320px !important;
+  height: calc(100vh - 36px) !important; /* Adjust height to account for banner */
+  background: white !important;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1) !important;
+  z-index: 9999998 !important; /* One less than banner */
+  transform: translateX(100%) !important;
+  transition: transform 0.3s ease, top 0.3s ease, height 0.3s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 .smart-comment-panel.visible {
-  transform: translateX(0);
+  transform: translateX(0) !important;
+}
+
+/* When banner is not visible, panel should take full height */
+#smart-comment-banner:not(.visible) ~ .smart-comment-panel {
+  top: 0 !important;
+  height: 100vh !important;
+}
+
+.panel-header {
+  padding: 16px !important;
+  background-color: #2196F3 !important;
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+}
+
+.panel-content {
+  flex: 1 !important;
+  padding: 16px !important;
+  overflow-y: auto !important;
+}
+
+/* Adjust main content when panel is visible */
+.smart-comment-panel.visible ~ #content {
+  margin-right: 320px !important;
+  width: calc(100% - 320px) !important;
+  transition: margin-right 0.3s ease, width 0.3s ease !important;
 }
