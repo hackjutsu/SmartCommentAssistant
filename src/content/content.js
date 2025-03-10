@@ -1,6 +1,28 @@
+// Import LLM service
+const serviceURL = chrome.runtime.getURL('src/services/llm-service.js');
+let LLMServiceFactory;
+
 // Global state
 let isExtensionActive = false;
 let commentObserver = null;
+let llmService = null;
+
+// Dynamic import of the module and initialize service
+import(serviceURL).then(module => {
+  LLMServiceFactory = module.LLMServiceFactory;
+  // Initialize with mock service immediately
+  llmService = LLMServiceFactory.createService('mock');
+}).catch(error => {
+  console.error('Failed to load LLM service:', error);
+});
+
+// Initialize LLM service (keeping this for future OpenAI implementation)
+async function initializeLLMService() {
+  // For now, always use mock service
+  if (!llmService && LLMServiceFactory) {
+    llmService = LLMServiceFactory.createService('mock');
+  }
+}
 
 // Create banner element
 function createBanner() {
@@ -51,6 +73,12 @@ function createPanel() {
   panel.id = 'smart-comment-panel';
   panel.className = 'smart-comment-panel';
 
+  // Add header
+  const header = document.createElement('div');
+  header.className = 'panel-header';
+  header.textContent = 'Smart Comment Assistant';
+  panel.appendChild(header);
+
   // Add content container
   const content = document.createElement('div');
   content.className = 'panel-content';
@@ -73,7 +101,7 @@ function createPanel() {
   styleSection.innerHTML = `
     <h3>Select Comment Style</h3>
     <div class="style-options">
-      <button class="style-button" data-style="positive">
+      <button class="style-button selected" data-style="positive">
         <span class="style-icon">😊</span>
         <span class="style-label">Positive/Supportive</span>
       </button>
@@ -102,12 +130,40 @@ function createPanel() {
   `;
   content.appendChild(promptSection);
 
+  // Add generate button section
+  const generateSection = document.createElement('div');
+  generateSection.className = 'generate-section';
+  generateSection.innerHTML = `
+    <button class="generate-button">
+      <span class="generate-icon">✨</span>
+      <span class="generate-label">Generate Reply</span>
+    </button>
+  `;
+  content.appendChild(generateSection);
+
+  // Add generated reply section (at the same level as prompt section)
+  const generatedReplySection = document.createElement('div');
+  generatedReplySection.className = 'generated-reply';
+  generatedReplySection.style.display = 'none';
+  generatedReplySection.innerHTML = `
+    <h3>Generated Reply</h3>
+    <div class="reply-box">
+      <div class="reply-text"></div>
+    </div>
+  `;
+  content.appendChild(generatedReplySection);
+
   panel.appendChild(content);
 
-  // Add event listener for style selection
+  // Add event listeners
   const styleOptions = panel.querySelector('.style-options');
   if (styleOptions) {
     styleOptions.addEventListener('click', handleStyleSelection);
+  }
+
+  const generateButton = panel.querySelector('.generate-button');
+  if (generateButton) {
+    generateButton.addEventListener('click', handleGenerate);
   }
 
   return panel;
@@ -168,6 +224,7 @@ function updatePanelContent(commentElement) {
   const commentDetails = selectedComment.querySelector('.comment-details');
   const authorElement = commentDetails.querySelector('.comment-author');
   const textElement = commentDetails.querySelector('.comment-text');
+  const generateButton = panel.querySelector('.generate-button');
 
   // Get comment details
   const authorName = commentElement.querySelector('#author-text').textContent.trim();
@@ -181,10 +238,16 @@ function updatePanelContent(commentElement) {
     // Update comment details
     authorElement.textContent = authorName;
     textElement.textContent = commentText;
+
+    // Enable generate button
+    generateButton.disabled = false;
   } else {
     // Show no selection message and hide comment details
     noSelectionMessage.style.display = 'block';
     commentDetails.style.display = 'none';
+
+    // Disable generate button
+    generateButton.disabled = true;
   }
 }
 
@@ -460,7 +523,7 @@ function setupContentsObserver() {
 }
 
 // Handle state changes
-function handleStateChange(activated) {
+async function handleStateChange(activated) {
   // Update state first
   isExtensionActive = activated;
 
@@ -468,6 +531,7 @@ function handleStateChange(activated) {
     // Initialize extension features
     showBanner();
     showPanel();
+    await initializeLLMService();
     setTimeout(() => {
       initializeCommentSelection();
     }, 2000);
@@ -475,6 +539,7 @@ function handleStateChange(activated) {
     // Clean up all extension features
     cleanupExtensionFeatures();
     hidePanel();
+    llmService = null;
   }
 }
 
@@ -508,4 +573,62 @@ function handleStyleSelection(event) {
 
   // Add selection to clicked button
   button.classList.add('selected');
+}
+
+// Handle generate button click
+async function handleGenerate() {
+  if (!llmService) {
+    console.warn('LLM service not initialized yet, retrying...');
+    // Try to initialize if not ready
+    await initializeLLMService();
+    if (!llmService) {
+      alert('Service not available. Please try again in a moment.');
+      return;
+    }
+  }
+
+  const panel = document.getElementById('smart-comment-panel');
+  const generateButton = panel.querySelector('.generate-button');
+  const generatedReply = panel.querySelector('.generated-reply');
+  const replyText = generatedReply.querySelector('.reply-text');
+
+  // Get selected comment
+  const selectedComment = document.querySelector('ytd-comment-view-model.selected');
+  if (!selectedComment) {
+    alert('Please select a comment first.');
+    return;
+  }
+
+  const commentText = selectedComment.querySelector('#content-text').textContent.trim();
+
+  // Get selected style (default to 'positive' if none selected)
+  const selectedStyleButton = panel.querySelector('.style-button.selected') || panel.querySelector('[data-style="positive"]');
+  if (!selectedStyleButton) {
+    alert('Please select a comment style.');
+    return;
+  }
+  const style = selectedStyleButton.dataset.style;
+
+  // Get user prompt
+  const userPrompt = panel.querySelector('.prompt-input').value.trim();
+
+  try {
+    // Disable button and show loading state
+    generateButton.disabled = true;
+    generateButton.innerHTML = '<span class="generate-icon">⏳</span><span class="generate-label">Generating...</span>';
+
+    // Generate reply
+    const reply = await llmService.generateReply(commentText, style, userPrompt);
+
+    // Show generated reply
+    replyText.textContent = reply;
+    generatedReply.style.display = 'block';
+  } catch (error) {
+    console.error('Failed to generate reply:', error);
+    alert('Failed to generate reply. Please try again.');
+  } finally {
+    // Reset button state
+    generateButton.disabled = false;
+    generateButton.innerHTML = '<span class="generate-icon">✨</span><span class="generate-label">Generate Reply</span>';
+  }
 }

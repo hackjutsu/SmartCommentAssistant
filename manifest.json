@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Smart Comment Assistant",
-  "version": "1.0.0",
-  "description": "Generate YouTube comment replies using OpenAI's API",
+  "version": "1.0",
+  "description": "AI-powered YouTube comment assistant",
   "permissions": [
     "storage",
     "activeTab"
@@ -11,13 +11,15 @@
     "https://*.youtube.com/*"
   ],
   "background": {
-    "service_worker": "src/background/background.js"
+    "service_worker": "src/background/background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
-      "matches": ["https://*.youtube.com/*"],
+      "matches": ["*://*.youtube.com/*"],
+      "css": ["styles/content.css"],
       "js": ["src/content/content.js"],
-      "css": ["styles/content.css"]
+      "type": "module"
     }
   ],
   "action": {
@@ -26,5 +28,10 @@
   },
   "icons": {
     "128": "assets/icon.svg"
-  }
+  },
+  "web_accessible_resources": [{
+    "resources": ["src/services/*"],
+    "matches": ["*://*.youtube.com/*"],
+    "use_dynamic_url": true
+  }]
 }

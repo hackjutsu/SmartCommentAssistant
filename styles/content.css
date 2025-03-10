@@ -277,3 +277,67 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
   color: #606060 !important;
   font-size: 14px !important;
 }
+
+/* Generate Section */
+.generate-section {
+  margin: 24px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.generate-button {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  padding: 12px !important;
+  border: none !important;
+  border-radius: 20px !important;
+  background-color: #065fd4 !important;
+  color: white !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.generate-button:hover:not(:disabled) {
+  background-color: #0356c5 !important;
+}
+
+.generate-button:disabled {
+  background-color: #ccc !important;
+  cursor: not-allowed !important;
+}
+
+.generate-icon {
+  font-size: 16px !important;
+  line-height: 1 !important;
+}
+
+.generated-reply {
+  margin-top: 20px;
+}
+
+.generated-reply h3 {
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #0f0f0f;
+}
+
+.generated-reply .reply-box {
+  background-color: #f2f2f2;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.generated-reply .reply-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #0f0f0f;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
