@@ -1,26 +1,50 @@
 // Import LLM service
 const serviceURL = chrome.runtime.getURL('src/services/llm-service.js');
 let LLMServiceFactory;
+let llmService = null;
 
 // Global state
 let isExtensionActive = false;
 let commentObserver = null;
-let llmService = null;
 
-// Dynamic import of the module and initialize service
-import(serviceURL).then(module => {
-  LLMServiceFactory = module.LLMServiceFactory;
-  // Initialize with mock service immediately
-  llmService = LLMServiceFactory.createService('mock');
-}).catch(error => {
-  console.error('Failed to load LLM service:', error);
-});
-
-// Initialize LLM service (keeping this for future OpenAI implementation)
+// Initialize LLM service
 async function initializeLLMService() {
-  // For now, always use mock service
-  if (!llmService && LLMServiceFactory) {
-    llmService = LLMServiceFactory.createService('mock');
+  try {
+    // If factory not loaded yet, load it
+    if (!LLMServiceFactory) {
+      const module = await import(serviceURL);
+      LLMServiceFactory = module.LLMServiceFactory;
+    }
+
+    // Get saved settings
+    const result = await chrome.storage.sync.get(['llmServiceType', 'apiKey']);
+    const serviceType = result.llmServiceType || 'mock';
+    const apiKey = result.apiKey;
+
+    // Create service instance
+    llmService = LLMServiceFactory.createService(serviceType, { apiKey });
+
+    // Update UI if panel exists
+    const serviceSelect = document.querySelector('.service-select');
+    const apiKeyInput = document.querySelector('.service-api-key');
+    const saveButton = document.querySelector('.save-api-key');
+
+    if (serviceSelect) {
+      serviceSelect.value = serviceType;
+    }
+    if (apiKeyInput) {
+      apiKeyInput.value = apiKey || '';
+      apiKeyInput.disabled = serviceType === 'mock';
+    }
+    if (saveButton) {
+      saveButton.disabled = serviceType === 'mock';
+    }
+  } catch (error) {
+    console.error('Failed to initialize LLM service:', error);
+    // Fall back to mock service
+    if (LLMServiceFactory) {
+      llmService = LLMServiceFactory.createService('mock');
+    }
   }
 }
 
@@ -90,6 +114,29 @@ function createPanel() {
   `;
   content.appendChild(promptSection);
 
+  // Add service selection section (moved here)
+  const serviceSection = document.createElement('div');
+  serviceSection.className = 'service-section';
+  serviceSection.innerHTML = `
+    <h3>LLM Service</h3>
+    <div class="service-controls">
+      <select class="service-select">
+        <option value="mock">Mock Service (Testing)</option>
+        <option value="openai">OpenAI</option>
+      </select>
+      <div class="api-key-input">
+        <input type="password"
+          placeholder="Enter API key/token"
+          class="service-api-key"
+          ${llmService?.apiKey ? 'value="' + llmService.apiKey + '"' : ''}
+          ${llmService?.type === 'mock' ? 'disabled' : ''}
+        />
+        <button class="save-api-key" ${llmService?.type === 'mock' ? 'disabled' : ''}>Save</button>
+      </div>
+    </div>
+  `;
+  content.appendChild(serviceSection);
+
   // Add generate button section
   const generateSection = document.createElement('div');
   generateSection.className = 'generate-section';
@@ -101,7 +148,7 @@ function createPanel() {
   `;
   content.appendChild(generateSection);
 
-  // Add generated reply section (at the same level as prompt section)
+  // Add generated reply section
   const generatedReplySection = document.createElement('div');
   generatedReplySection.className = 'generated-reply';
   generatedReplySection.style.display = 'none';
@@ -124,6 +171,18 @@ function createPanel() {
   const generateButton = panel.querySelector('.generate-button');
   if (generateButton) {
     generateButton.addEventListener('click', handleGenerate);
+  }
+
+  // Add event listeners for service controls
+  const serviceSelect = panel.querySelector('.service-select');
+  const saveApiKeyButton = panel.querySelector('.save-api-key');
+
+  if (serviceSelect) {
+    serviceSelect.addEventListener('change', handleServiceChange);
+  }
+
+  if (saveApiKeyButton) {
+    saveApiKeyButton.addEventListener('click', handleSaveApiKey);
   }
 
   return panel;
@@ -599,5 +658,53 @@ async function handleGenerate() {
     // Reset button state
     generateButton.disabled = false;
     generateButton.innerHTML = '<span class="generate-icon">✨</span><span class="generate-label">Generate Reply</span>';
+  }
+}
+
+// Handle service selection change
+async function handleServiceChange(event) {
+  const serviceType = event.target.value;
+  const apiKeyInput = document.querySelector('.service-api-key');
+  const saveButton = document.querySelector('.save-api-key');
+  const apiKey = apiKeyInput.value.trim();
+
+  // Toggle API key input and save button based on service type
+  apiKeyInput.disabled = serviceType === 'mock';
+  saveButton.disabled = serviceType === 'mock';
+
+  try {
+    llmService = LLMServiceFactory.createService(serviceType, { apiKey });
+    // Save service type to storage
+    await chrome.storage.sync.set({ llmServiceType: serviceType });
+    if (apiKey && serviceType !== 'mock') {
+      await chrome.storage.sync.set({ apiKey });
+    }
+  } catch (error) {
+    console.error('Failed to initialize service:', error);
+    alert('Failed to initialize service. Please try again.');
+  }
+}
+
+// Handle API key save
+async function handleSaveApiKey() {
+  const apiKeyInput = document.querySelector('.service-api-key');
+  const serviceSelect = document.querySelector('.service-select');
+  const apiKey = apiKeyInput.value.trim();
+  const serviceType = serviceSelect.value;
+
+  if (!apiKey) {
+    alert('Please enter an API key');
+    return;
+  }
+
+  try {
+    // Save API key to storage
+    await chrome.storage.sync.set({ apiKey });
+    // Reinitialize service with new key
+    llmService = LLMServiceFactory.createService(serviceType, { apiKey });
+    alert('API key saved successfully');
+  } catch (error) {
+    console.error('Failed to save API key:', error);
+    alert('Failed to save API key. Please try again.');
   }
 }
