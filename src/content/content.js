@@ -558,7 +558,9 @@ function setupContentsObserver() {
   // Set up observer for the comments contents div
   commentObserver = new MutationObserver((mutations) => {
     if (!isExtensionActive) {
-      commentObserver.disconnect();
+      if (commentObserver) {
+        commentObserver.disconnect();
+      }
       return;
     }
 
