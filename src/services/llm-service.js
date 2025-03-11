@@ -108,7 +108,7 @@ class OpenAIService extends LLMService {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error?.message || 'Failed to generate reply');
+        throw new Error(error.error?.message || 'Failed to generate response');
       }
 
       const data = await response.json();
@@ -125,7 +125,7 @@ class OpenAIService extends LLMService {
 
     } catch (error) {
       console.error('OpenAI API Error:', error);
-      throw new Error(`Failed to generate reply: ${error.message}`);
+      throw new Error(`Failed to generate response: ${error.message}`);
     }
   }
 }

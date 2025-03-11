@@ -98,11 +98,13 @@ function createPanel() {
   const selectedComment = document.createElement('div');
   selectedComment.className = 'selected-comment';
   selectedComment.innerHTML = `
-    <div class="no-selection-message">No comment selected. Refresh if the comment cannot be selected.</div>
-    <div class="comment-details" style="display: none;">
-      <div class="comment-author"></div>
-      <div class="comment-text"></div>
-    </div>
+    <h3>Comment to respond</h3>
+    <div class="comment-author"></div>
+    <textarea
+      class="prompt-input comment-input"
+      placeholder="No comment selected. You can paste a comment here or select one from YouTube."
+      rows="4"
+    ></textarea>
   `;
   content.appendChild(selectedComment);
 
@@ -110,7 +112,7 @@ function createPanel() {
   const styleSection = document.createElement('div');
   styleSection.className = 'style-selection';
   styleSection.innerHTML = `
-    <h3>Select Comment Style</h3>
+    <h3>Select Response Style</h3>
     <div class="style-options">
       <button class="style-button selected" data-style="positive">
         <span class="style-icon">😊</span>
@@ -132,7 +134,7 @@ function createPanel() {
   const promptSection = document.createElement('div');
   promptSection.className = 'prompt-section';
   promptSection.innerHTML = `
-    <h3>Your Initial Comment</h3>
+    <h3>Your Initial Response</h3>
     <textarea
       class="prompt-input"
       placeholder="Enter your initial thoughts or the main points you want to convey..."
@@ -173,7 +175,7 @@ function createPanel() {
   generateSection.innerHTML = `
     <button class="generate-button">
       <span class="generate-icon">✨</span>
-      <span class="generate-label">Generate Reply</span>
+      <span class="generate-label">Generate response</span>
     </button>
   `;
   content.appendChild(generateSection);
@@ -184,7 +186,7 @@ function createPanel() {
   generatedReplySection.style.display = 'none';
   generatedReplySection.innerHTML = `
     <h3>
-      Generated Reply
+      Generated AI Response
       <div class="reply-actions">
         <button class="action-button copy-button" title="Copy to clipboard">Copy</button>
         <button class="action-button reset-button" title="Reset to original">Reset</button>
@@ -334,27 +336,19 @@ function updatePanelContent(commentElement) {
   if (!panel) return;
 
   const selectedComment = panel.querySelector('.selected-comment');
-  const noSelectionMessage = selectedComment.querySelector('.no-selection-message');
-  const commentDetails = selectedComment.querySelector('.comment-details');
-  const authorElement = commentDetails.querySelector('.comment-author');
-  const textElement = commentDetails.querySelector('.comment-text');
+  const commentInput = selectedComment.querySelector('.comment-input');
+  const authorElement = selectedComment.querySelector('.comment-author');
 
   // Get comment details
   const authorName = commentElement.querySelector('#author-text').textContent.trim();
   const commentText = commentElement.querySelector('#content-text').textContent.trim();
 
   if (commentElement) {
-    // Hide no selection message and show comment details
-    noSelectionMessage.style.display = 'none';
-    commentDetails.style.display = 'block';
-
-    // Update comment details
-    authorElement.textContent = authorName;
-    textElement.textContent = commentText;
-  } else {
-    // Show no selection message and hide comment details
-    noSelectionMessage.style.display = 'block';
-    commentDetails.style.display = 'none';
+    // Update comment textarea with the selected comment
+    commentInput.value = commentText;
+    // Update author name and store it as a data attribute
+    authorElement.textContent = `From: ${authorName}`;
+    commentInput.dataset.author = authorName;
   }
 
   // Update generate button state
@@ -712,15 +706,14 @@ async function handleGenerate() {
   const generateButton = panel.querySelector('.generate-button');
   const generatedReply = panel.querySelector('.generated-reply');
   const replyTextarea = generatedReply.querySelector('.prompt-input');
+  const commentInput = panel.querySelector('.comment-input');
 
-  // Get selected comment
-  const selectedComment = document.querySelector('ytd-comment-view-model.selected');
-  if (!selectedComment) {
-    alert('Please select a comment first.');
+  // Get comment text from the textarea
+  const commentText = commentInput.value.trim();
+  if (!commentText) {
+    alert('Please enter or select a comment to respond to.');
     return;
   }
-
-  const commentText = selectedComment.querySelector('#content-text').textContent.trim();
 
   // Get selected style (default to 'positive' if none selected)
   const selectedStyleButton = panel.querySelector('.style-button.selected') || panel.querySelector('[data-style="positive"]');
@@ -731,14 +724,14 @@ async function handleGenerate() {
   const style = selectedStyleButton.dataset.style;
 
   // Get user prompt
-  const userPrompt = panel.querySelector('.prompt-input').value.trim();
+  const userPrompt = panel.querySelector('.prompt-input:not(.comment-input)').value.trim();
 
   try {
     // Disable button and show loading state
     generateButton.disabled = true;
     generateButton.innerHTML = '<span class="generate-icon">⏳</span><span class="generate-label">Generating...</span>';
 
-    // Generate reply
+    // Generate response
     const reply = await llmService.generateReply(commentText, style, userPrompt);
 
     // Show generated reply
@@ -746,12 +739,12 @@ async function handleGenerate() {
     replyTextarea.dataset.originalReply = reply;  // Store original reply for reset functionality
     generatedReply.style.display = 'block';
   } catch (error) {
-    console.error('Failed to generate reply:', error);
-    alert('Failed to generate reply. Please try again.');
+    console.error('Failed to generate response:', error);
+    alert('Failed to generate response. Please try again.');
   } finally {
     // Reset button state
     generateButton.disabled = false;
-    generateButton.innerHTML = '<span class="generate-icon">✨</span><span class="generate-label">Generate Reply</span>';
+    generateButton.innerHTML = '<span class="generate-icon">✨</span><span class="generate-label">Generate response</span>';
   }
 }
 
@@ -763,17 +756,18 @@ function updateGenerateButtonState() {
   const generateButton = panel.querySelector('.generate-button');
   const serviceSelect = panel.querySelector('.service-select');
   const apiKeyInput = panel.querySelector('.service-api-key');
-  const selectedComment = document.querySelector('ytd-comment-view-model.selected');
+  const commentInput = panel.querySelector('.comment-input');
 
-  if (!generateButton || !serviceSelect || !apiKeyInput) return;
+  if (!generateButton || !serviceSelect || !apiKeyInput || !commentInput) return;
 
   const serviceType = serviceSelect.value;
   const apiKey = apiKeyInput.value.trim();
+  const commentText = commentInput.value.trim();
 
   // Disable button if:
-  // 1. No comment is selected OR
+  // 1. No comment text is present OR
   // 2. Using non-mock service without API key
-  const shouldDisable = !selectedComment || (serviceType !== 'mock' && !apiKey);
+  const shouldDisable = !commentText || (serviceType !== 'mock' && !apiKey);
   generateButton.disabled = shouldDisable;
 }
 

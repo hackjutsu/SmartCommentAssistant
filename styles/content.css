@@ -173,11 +173,25 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
 
 /* Panel content styles */
 .selected-comment {
-  padding: 16px !important;
-  background: #f8f9fa !important;
-  border-radius: 8px !important;
-  margin-bottom: 16px !important;
-  box-sizing: border-box !important;
+  margin-bottom: 24px !important;
+}
+
+.selected-comment h3 {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #030303 !important;
+  margin-bottom: 12px !important;
+}
+
+.selected-comment .comment-author {
+  font-size: 13px !important;
+  color: #606060 !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+}
+
+.comment-input {
+  margin: 0 !important;
 }
 
 .no-selection-message {
