@@ -31,13 +31,15 @@ class MockLLMService extends LLMService {
 
     // Mock responses based on style
     const responses = {
-      positive: `Thanks for sharing your thoughts on "${videoTitle}"! Really appreciate your thoughtful comment. 👍`,
-      constructive: `Interesting perspective on "${videoTitle}"! Have you also considered looking at it from another angle? 🤔`,
-      critical: `While I see your point about "${videoTitle}", I respectfully disagree. Let's discuss further.`
+      'super-agree': `OMG YES!!! 🤩 Your comment about "${videoTitle}" is absolutely BRILLIANT! I couldn't agree more! This is exactly what I was thinking! You totally nailed it! ✨`,
+      'agree': `You make a great point about "${videoTitle}"! 😃 I completely agree with your perspective and really appreciate you sharing your thoughts! 👍`,
+      'neutral': `Interesting thoughts on "${videoTitle}" 🤔. While I see your point, we could also consider different aspects of this topic. Let's explore this further...`,
+      'disagree': `I have to respectfully disagree with your take on "${videoTitle}" 😡. Here's why I think differently...`,
+      'super-disagree': `Oh please... 💩 This has to be one of the most ridiculous comments I've seen about "${videoTitle}". Are you seriously suggesting that...? *eye roll*`
     };
 
-    // Return appropriate response based on style
-    return responses[style];
+    // Return appropriate response based on style, fallback to neutral if style not found
+    return responses[style] || responses['neutral'];
   }
 }
 
@@ -69,12 +71,14 @@ class OpenAIService extends LLMService {
 
       // Create system prompt based on style
       const stylePrompts = {
-        positive: "You are a supportive and encouraging commenter. Your goal is to provide positive feedback while maintaining authenticity.",
-        constructive: "You are a thoughtful commenter who provides constructive feedback. Your goal is to offer alternative perspectives and suggestions respectfully.",
-        critical: "You are a critical thinker who challenges ideas respectfully. Your goal is to express disagreement or concerns while maintaining professionalism."
+        'super-agree': "You are an extremely enthusiastic and excited commenter. Express strong agreement and amplify the comment's points with high energy, using exclamation marks and positive language. Show genuine excitement while staying authentic.",
+        'agree': "You are a supportive and friendly commenter. Express agreement with the comment's points in a positive and constructive way, while maintaining a balanced and genuine tone.",
+        'neutral': "You are a thoughtful and balanced commenter. Consider multiple perspectives and provide a well-reasoned response that neither strongly agrees nor disagrees with the comment.",
+        'disagree': "You are a respectfully critical commenter. Express disagreement with the comment's points while maintaining professionalism and providing clear reasoning for your perspective.",
+        'super-disagree': "You are a sarcastic and critical commenter. Express strong disagreement with the comment using rhetorical questions and witty remarks, while still maintaining some level of civility."
       };
 
-      const systemPrompt = stylePrompts[style] || stylePrompts.constructive;
+      const systemPrompt = stylePrompts[style] || stylePrompts.neutral;
 
       // Construct the user prompt with video context
       let promptText = videoTitle
@@ -94,7 +98,7 @@ class OpenAIService extends LLMService {
           'Authorization': `Bearer ${this.apiKey}`
         },
         body: JSON.stringify({
-          model: this.model,  // Use the specified model
+          model: this.model,
           messages: [
             {
               role: "system",

@@ -122,18 +122,24 @@ function createPanel() {
   styleSection.innerHTML = `
     <h3>Select Response Style</h3>
     <div class="style-options">
-      <button class="style-button selected" data-style="positive">
-        <span class="style-icon">😊</span>
-        <span class="style-label">Positive/Supportive</span>
+      <button class="style-button" data-style="super-agree">
+        <span class="style-icon">🤩</span>
       </button>
-      <button class="style-button" data-style="constructive">
-        <span class="style-icon">💡</span>
-        <span class="style-label">Constructive/Thoughtful</span>
+      <button class="style-button" data-style="agree">
+        <span class="style-icon">😃</span>
       </button>
-      <button class="style-button" data-style="critical">
+      <button class="style-button selected" data-style="neutral">
         <span class="style-icon">🤔</span>
-        <span class="style-label">Critical/Negative</span>
       </button>
+      <button class="style-button" data-style="disagree">
+        <span class="style-icon">😡</span>
+      </button>
+      <button class="style-button" data-style="super-disagree">
+        <span class="style-icon">💩</span>
+      </button>
+    </div>
+    <div class="style-message">
+      <p>🤔 I want to think this through carefully. I'll write a balanced response that considers different perspectives.</p>
     </div>
   `;
   content.appendChild(styleSection);
@@ -270,6 +276,7 @@ function createPanel() {
   const saveApiKeyButton = panel.querySelector('.save-api-key');
   const clearApiKeyButton = panel.querySelector('.clear-api-key');
   const apiKeyInput = panel.querySelector('.service-api-key');
+  const commentInput = panel.querySelector('.comment-input');
 
   if (serviceSelect) {
     serviceSelect.addEventListener('change', handleServiceChange);
@@ -285,6 +292,11 @@ function createPanel() {
 
   if (apiKeyInput) {
     apiKeyInput.addEventListener('input', updateGenerateButtonState);
+  }
+
+  // Add event listener for comment input changes
+  if (commentInput) {
+    commentInput.addEventListener('input', updateGenerateButtonState);
   }
 
   // Initialize generate button state
@@ -705,6 +717,20 @@ function handleStyleSelection(event) {
 
   // Add selection to clicked button
   button.classList.add('selected');
+
+  // Update style message
+  const styleMessage = document.querySelector('.style-message');
+  if (styleMessage) {
+    const style = button.dataset.style;
+    const messages = {
+      'super-agree': '🤩 Absolutely LOVE this comment! Respond with maximum enthusiasm and excitement!',
+      'agree': '😃 Like this point of view! Write a friendly and supportive response.',
+      'neutral': '🤔 Think this through carefully. Write a balanced response that considers different perspectives.',
+      'disagree': '😡 Don\'t agree with this. Explain my opposing viewpoint clearly.',
+      'super-disagree': '💩 This comment is completely wrong. Respond with heavy sarcasm and rhetorical questions.'
+    };
+    styleMessage.innerHTML = `<p>${messages[style] || messages['neutral']}</p>`;
+  }
 }
 
 // Handle generate button click
@@ -784,9 +810,8 @@ function updateGenerateButtonState() {
   const apiKey = apiKeyInput.value.trim();
   const commentText = commentInput.value.trim();
 
-  // Disable button if:
-  // 1. No comment text is present OR
-  // 2. Using non-mock service without API key
+  // For mock service, only check if there's comment text
+  // For other services, check both comment text and API key
   const shouldDisable = !commentText || (serviceType !== 'mock' && !apiKey);
   generateButton.disabled = shouldDisable;
 }
