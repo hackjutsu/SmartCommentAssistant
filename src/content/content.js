@@ -110,7 +110,7 @@ function createPanel() {
     <div class="comment-author"></div>
     <textarea
       class="prompt-input comment-input"
-      placeholder="No comment selected. You can paste a comment here or select one from YouTube."
+      placeholder="Select a comment to respond. Click on 🔄 if the comments are not selectable."
       rows="4"
     ></textarea>
   `;
@@ -723,11 +723,11 @@ function handleStyleSelection(event) {
   if (styleMessage) {
     const style = button.dataset.style;
     const messages = {
-      'super-agree': '🤩 Absolutely LOVE this comment! Respond with maximum enthusiasm and excitement!',
+      'super-agree': '🤩 LOVE this comment! Respond with maximum enthusiasm!',
       'agree': '😃 Like this point of view! Write a friendly and supportive response.',
-      'neutral': '🤔 Think this through carefully. Write a balanced response that considers different perspectives.',
+      'neutral': '🤔 Think this through carefully. Write a balanced response.',
       'disagree': '😡 Don\'t agree with this. Explain my opposing viewpoint clearly.',
-      'super-disagree': '💩 This comment is completely wrong. Respond with heavy sarcasm and rhetorical questions.'
+      'super-disagree': '💩 This comment is completely WRONG. Respond with heavy sarcasm.'
     };
     styleMessage.innerHTML = `<p>${messages[style] || messages['neutral']}</p>`;
   }
