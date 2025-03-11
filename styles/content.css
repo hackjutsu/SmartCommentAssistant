@@ -501,26 +501,82 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
 }
 
 .generated-reply {
-  margin-top: 20px;
+  margin-top: 20px !important;
 }
 
 .generated-reply h3 {
-  margin-bottom: 12px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #0f0f0f;
+  margin-bottom: 12px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  color: #0f0f0f !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+}
+
+.generated-reply .reply-actions {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.generated-reply .action-button {
+  padding: 4px 8px !important;
+  border: none !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  color: white !important;
+}
+
+.generated-reply .copy-button {
+  background-color: #2196F3 !important;
+}
+
+.generated-reply .copy-button:hover {
+  background-color: #1976D2 !important;
+}
+
+.generated-reply .reset-button {
+  background-color: #757575 !important;
+}
+
+.generated-reply .reset-button:hover {
+  background-color: #616161 !important;
 }
 
 .generated-reply .reply-box {
-  background-color: #f2f2f2;
-  border-radius: 8px;
-  padding: 16px;
+  background-color: #f8f9fa !important;
+  border-radius: 8px !important;
+  padding: 16px !important;
+  position: relative !important;
 }
 
-.generated-reply .reply-text {
-  font-size: 14px;
-  line-height: 1.5;
-  color: #0f0f0f;
-  white-space: pre-wrap;
-  word-break: break-word;
+.generated-reply .reply-textarea {
+  width: 100% !important;
+  min-height: 120px !important;
+  padding: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  color: #0f0f0f !important;
+  resize: vertical !important;
+  font-family: Roboto, Arial, sans-serif !important;
+}
+
+.generated-reply .reply-textarea:focus {
+  outline: none !important;
+}
+
+.generated-reply .action-button:active {
+  transform: scale(0.98) !important;
+}
+
+.generated-reply .action-success {
+  background-color: #34a853 !important;
 }

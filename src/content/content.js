@@ -97,7 +97,7 @@ function createPanel() {
   const selectedComment = document.createElement('div');
   selectedComment.className = 'selected-comment';
   selectedComment.innerHTML = `
-    <div class="no-selection-message">No comment selected</div>
+    <div class="no-selection-message">No comment selected. Refresh if the comment cannot be selected.</div>
     <div class="comment-details" style="display: none;">
       <div class="comment-author"></div>
       <div class="comment-text"></div>
@@ -182,12 +182,51 @@ function createPanel() {
   generatedReplySection.className = 'generated-reply';
   generatedReplySection.style.display = 'none';
   generatedReplySection.innerHTML = `
-    <h3>Generated Reply</h3>
+    <h3>
+      Generated Reply
+      <div class="reply-actions">
+        <button class="action-button copy-button" title="Copy to clipboard">Copy</button>
+        <button class="action-button reset-button" title="Reset to original">Reset</button>
+      </div>
+    </h3>
     <div class="reply-box">
-      <div class="reply-text"></div>
+      <textarea
+        class="prompt-input"
+        rows="4"
+      ></textarea>
     </div>
   `;
   content.appendChild(generatedReplySection);
+
+  // Add event listeners for copy and reset buttons
+  const copyButton = generatedReplySection.querySelector('.copy-button');
+  const resetButton = generatedReplySection.querySelector('.reset-button');
+  const replyTextarea = generatedReplySection.querySelector('.prompt-input');
+
+  if (copyButton) {
+    copyButton.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(replyTextarea.value);
+        copyButton.textContent = 'Copied!';
+        copyButton.classList.add('action-success');
+        setTimeout(() => {
+          copyButton.textContent = 'Copy';
+          copyButton.classList.remove('action-success');
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy text:', err);
+        alert('Failed to copy text to clipboard');
+      }
+    });
+  }
+
+  if (resetButton) {
+    resetButton.addEventListener('click', () => {
+      if (replyTextarea.dataset.originalReply) {
+        replyTextarea.value = replyTextarea.dataset.originalReply;
+      }
+    });
+  }
 
   panel.appendChild(content);
 
@@ -656,7 +695,7 @@ async function handleGenerate() {
   const panel = document.getElementById('smart-comment-panel');
   const generateButton = panel.querySelector('.generate-button');
   const generatedReply = panel.querySelector('.generated-reply');
-  const replyText = generatedReply.querySelector('.reply-text');
+  const replyTextarea = generatedReply.querySelector('.prompt-input');
 
   // Get selected comment
   const selectedComment = document.querySelector('ytd-comment-view-model.selected');
@@ -687,7 +726,8 @@ async function handleGenerate() {
     const reply = await llmService.generateReply(commentText, style, userPrompt);
 
     // Show generated reply
-    replyText.textContent = reply;
+    replyTextarea.value = reply;
+    replyTextarea.dataset.originalReply = reply;  // Store original reply for reset functionality
     generatedReply.style.display = 'block';
   } catch (error) {
     console.error('Failed to generate reply:', error);
