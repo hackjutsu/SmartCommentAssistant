@@ -28,6 +28,7 @@ async function initializeLLMService() {
     const serviceSelect = document.querySelector('.service-select');
     const apiKeyInput = document.querySelector('.service-api-key');
     const saveButton = document.querySelector('.save-api-key');
+    const clearButton = document.querySelector('.clear-api-key');
 
     if (serviceSelect) {
       serviceSelect.value = serviceType;
@@ -39,6 +40,9 @@ async function initializeLLMService() {
     if (saveButton) {
       saveButton.disabled = serviceType === 'mock';
     }
+    if (clearButton) {
+      clearButton.disabled = serviceType === 'mock';
+    }
 
     // Update generate button state after initialization
     updateGenerateButtonState();
@@ -46,11 +50,12 @@ async function initializeLLMService() {
     console.error('Failed to initialize LLM service:', error);
     // Fall back to mock service
     if (LLMServiceFactory) {
-      llmService = LLMServiceFactory.createService('mock');
+      llmService = LLMServiceFactory.createService('mock', {});
       // Update UI to reflect fallback to mock service
       const serviceSelect = document.querySelector('.service-select');
       const apiKeyInput = document.querySelector('.service-api-key');
       const saveButton = document.querySelector('.save-api-key');
+      const clearButton = document.querySelector('.clear-api-key');
 
       if (serviceSelect) {
         serviceSelect.value = 'mock';
@@ -60,6 +65,9 @@ async function initializeLLMService() {
       }
       if (saveButton) {
         saveButton.disabled = true;
+      }
+      if (clearButton) {
+        clearButton.disabled = true;
       }
       // Update generate button state for mock service
       updateGenerateButtonState();
@@ -149,7 +157,10 @@ function createPanel() {
           ${llmService?.apiKey ? 'value="' + llmService.apiKey + '"' : ''}
           ${llmService?.type === 'mock' ? 'disabled' : ''}
         />
-        <button class="save-api-key" ${llmService?.type === 'mock' ? 'disabled' : ''}>Save</button>
+        <div class="api-key-buttons">
+          <button class="save-api-key" title="Save API Key" ${llmService?.type === 'mock' ? 'disabled' : ''}></button>
+          <button class="clear-api-key" title="Clear API Key" ${llmService?.type === 'mock' ? 'disabled' : ''}></button>
+        </div>
       </div>
     </div>
   `;
@@ -194,6 +205,7 @@ function createPanel() {
   // Add event listeners for service controls
   const serviceSelect = panel.querySelector('.service-select');
   const saveApiKeyButton = panel.querySelector('.save-api-key');
+  const clearApiKeyButton = panel.querySelector('.clear-api-key');
   const apiKeyInput = panel.querySelector('.service-api-key');
 
   if (serviceSelect) {
@@ -202,6 +214,10 @@ function createPanel() {
 
   if (saveApiKeyButton) {
     saveApiKeyButton.addEventListener('click', handleSaveApiKey);
+  }
+
+  if (clearApiKeyButton) {
+    clearApiKeyButton.addEventListener('click', handleClearApiKey);
   }
 
   if (apiKeyInput) {
@@ -710,33 +726,57 @@ async function handleServiceChange(event) {
   const serviceType = event.target.value;
   const apiKeyInput = document.querySelector('.service-api-key');
   const saveButton = document.querySelector('.save-api-key');
+  const clearButton = document.querySelector('.clear-api-key');
   const apiKey = apiKeyInput.value.trim();
 
-  // Toggle API key input and save button based on service type
-  apiKeyInput.disabled = serviceType === 'mock';
-  saveButton.disabled = serviceType === 'mock';
-
   try {
-    llmService = LLMServiceFactory.createService(serviceType, { apiKey });
+    // If factory not loaded yet, load it
+    if (!LLMServiceFactory) {
+      const module = await import(serviceURL);
+      LLMServiceFactory = module.LLMServiceFactory;
+    }
+
+    // Toggle API key input and buttons based on service type
+    const isMockService = serviceType === 'mock';
+    apiKeyInput.disabled = isMockService;
+    saveButton.disabled = isMockService;
+    clearButton.disabled = isMockService;
+
+    // Create new service instance or update existing one
+    if (!llmService || llmService.type !== serviceType) {
+      // Only create new service if type is different
+      llmService = LLMServiceFactory.createService(serviceType, {});
+      // Set API key after creation if one exists
+      if (apiKey) {
+        llmService.setApiKey(apiKey);
+      }
+    }
+
     // Save service type to storage
     await chrome.storage.sync.set({ llmServiceType: serviceType });
-    if (apiKey && serviceType !== 'mock') {
+
+    // If there's an API key and it's not mock service, save it
+    if (apiKey && !isMockService) {
       await chrome.storage.sync.set({ apiKey });
     }
+
     // Update generate button state after service change
     updateGenerateButtonState();
   } catch (error) {
-    console.error('Failed to initialize service:', error);
-    alert('Failed to initialize service. Please try again.');
+    console.error('Failed to switch service:', error);
+    // Fall back to mock service only if there's a critical error
+    event.target.value = 'mock';
+    apiKeyInput.disabled = true;
+    saveButton.disabled = true;
+    clearButton.disabled = true;
+    llmService = LLMServiceFactory?.createService('mock', {});
   }
 }
 
 // Handle API key save
 async function handleSaveApiKey() {
   const apiKeyInput = document.querySelector('.service-api-key');
-  const serviceSelect = document.querySelector('.service-select');
   const apiKey = apiKeyInput.value.trim();
-  const serviceType = serviceSelect.value;
 
   if (!apiKey) {
     alert('Please enter an API key');
@@ -746,13 +786,43 @@ async function handleSaveApiKey() {
   try {
     // Save API key to storage
     await chrome.storage.sync.set({ apiKey });
-    // Reinitialize service with new key
-    llmService = LLMServiceFactory.createService(serviceType, { apiKey });
+
+    // Update API key in service
+    if (llmService) {
+      llmService.setApiKey(apiKey);
+    }
+
     alert('API key saved successfully');
     // Update generate button state after saving API key
     updateGenerateButtonState();
   } catch (error) {
     console.error('Failed to save API key:', error);
     alert('Failed to save API key. Please try again.');
+  }
+}
+
+// Handle API key clear
+async function handleClearApiKey() {
+  const apiKeyInput = document.querySelector('.service-api-key');
+
+  try {
+    // Clear API key from storage
+    await chrome.storage.sync.remove('apiKey');
+
+    // Clear input field
+    apiKeyInput.value = '';
+
+    // Clear API key in service
+    if (llmService) {
+      llmService.setApiKey(null);
+    }
+
+    // Update generate button state
+    updateGenerateButtonState();
+
+    alert('API key cleared successfully');
+  } catch (error) {
+    console.error('Failed to clear API key:', error);
+    alert('Failed to clear API key. Please try again.');
   }
 }

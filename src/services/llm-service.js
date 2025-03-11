@@ -1,5 +1,13 @@
 // Base LLM Service class
 class LLMService {
+  constructor() {
+    this.type = 'base';
+  }
+
+  setApiKey(apiKey) {
+    throw new Error('Method not implemented');
+  }
+
   async generateReply(comment, style, userPrompt, maxLength = 140) {
     throw new Error('Method not implemented');
   }
@@ -7,6 +15,16 @@ class LLMService {
 
 // Mock implementation for testing
 class MockLLMService extends LLMService {
+  constructor() {
+    super();
+    this.type = 'mock';
+  }
+
+  setApiKey(apiKey) {
+    // Mock service doesn't need an API key
+    return;
+  }
+
   async generateReply(comment, style, userPrompt, maxLength = 140) {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
@@ -27,9 +45,11 @@ class MockLLMService extends LLMService {
 class OpenAIService extends LLMService {
   constructor(apiKey) {
     super();
-    if (!apiKey) {
-      throw new Error('API key is required for OpenAI service');
-    }
+    this.type = 'openai';
+    this.apiKey = apiKey;
+  }
+
+  setApiKey(apiKey) {
     this.apiKey = apiKey;
   }
 
@@ -38,6 +58,9 @@ class OpenAIService extends LLMService {
       // Validate inputs
       if (!comment) throw new Error('Comment is required');
       if (!style) throw new Error('Style is required');
+
+      // Validate API key
+      if (!this.apiKey) throw new Error('API key is required for OpenAI service');
 
       // Create system prompt based on style
       const stylePrompts = {
@@ -54,6 +77,7 @@ class OpenAIService extends LLMService {
         promptText += `\nConsider these points in your response: ${userPrompt}`;
       }
       promptText += `\nKeep the response under ${maxLength} characters.`;
+
 
       // Make API request
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -108,12 +132,19 @@ class OpenAIService extends LLMService {
 
 // Factory for creating LLM services
 class LLMServiceFactory {
-  static createService(type, config) {
+  static createService(type, config = {}) {
+    const { apiKey } = config;
+
     switch (type) {
       case 'mock':
-        return new MockLLMService();
+        const mockService = new MockLLMService();
+        if (apiKey) {
+          mockService.setApiKey(apiKey);
+        }
+        return mockService;
       case 'openai':
-        return new OpenAIService(config?.apiKey);
+        const openaiService = new OpenAIService(apiKey);
+        return openaiService;
       default:
         throw new Error(`Unknown LLM service type: ${type}`);
     }
