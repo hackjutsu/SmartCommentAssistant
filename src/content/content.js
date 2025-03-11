@@ -139,7 +139,7 @@ function createPanel() {
       </button>
     </div>
     <div class="style-message">
-      <p>🤔 I want to think this through carefully. I'll write a balanced response that considers different perspectives.</p>
+      <p>🤔 Think this through carefully. Write a balanced response.</p>
     </div>
   `;
   content.appendChild(styleSection);
