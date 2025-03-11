@@ -99,6 +99,7 @@ function createPanel() {
   selectedComment.className = 'selected-comment';
   selectedComment.innerHTML = `
     <h3>Comment to respond</h3>
+    <div class="video-title"></div>
     <div class="comment-author"></div>
     <textarea
       class="prompt-input comment-input"
@@ -338,10 +339,14 @@ function updatePanelContent(commentElement) {
   const selectedComment = panel.querySelector('.selected-comment');
   const commentInput = selectedComment.querySelector('.comment-input');
   const authorElement = selectedComment.querySelector('.comment-author');
+  const videoTitleElement = selectedComment.querySelector('.video-title');
 
   // Get comment details
   const authorName = commentElement.querySelector('#author-text').textContent.trim();
   const commentText = commentElement.querySelector('#content-text').textContent.trim();
+
+  // Get video title
+  const videoTitle = document.querySelector('h1.ytd-video-primary-info-renderer')?.textContent?.trim() || '';
 
   if (commentElement) {
     // Update comment textarea with the selected comment
@@ -349,6 +354,11 @@ function updatePanelContent(commentElement) {
     // Update author name and store it as a data attribute
     authorElement.textContent = `From: ${authorName}`;
     commentInput.dataset.author = authorName;
+    // Update video title
+    if (videoTitle) {
+      videoTitleElement.textContent = `Video: ${videoTitle}`;
+      commentInput.dataset.videoTitle = videoTitle;
+    }
   }
 
   // Update generate button state
@@ -715,6 +725,9 @@ async function handleGenerate() {
     return;
   }
 
+  // Get video title from the data attribute
+  const videoTitle = commentInput.dataset.videoTitle;
+
   // Get selected style (default to 'positive' if none selected)
   const selectedStyleButton = panel.querySelector('.style-button.selected') || panel.querySelector('[data-style="positive"]');
   if (!selectedStyleButton) {
@@ -731,8 +744,8 @@ async function handleGenerate() {
     generateButton.disabled = true;
     generateButton.innerHTML = '<span class="generate-icon">⏳</span><span class="generate-label">Generating...</span>';
 
-    // Generate response
-    const reply = await llmService.generateReply(commentText, style, userPrompt);
+    // Generate response with video title
+    const reply = await llmService.generateReply(commentText, style, userPrompt, undefined, videoTitle);
 
     // Show generated reply
     replyTextarea.value = reply;

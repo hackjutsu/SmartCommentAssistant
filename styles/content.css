@@ -183,6 +183,16 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
   margin-bottom: 12px !important;
 }
 
+.selected-comment .video-title {
+  font-size: 13px !important;
+  color: #606060 !important;
+  margin-bottom: 8px !important;
+  display: block !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
 .selected-comment .comment-author {
   font-size: 13px !important;
   color: #606060 !important;

@@ -8,7 +8,7 @@ class LLMService {
     throw new Error('Method not implemented');
   }
 
-  async generateReply(comment, style, userPrompt, maxLength = 140) {
+  async generateReply(comment, style, userPrompt, maxLength = 140, videoTitle = '') {
     throw new Error('Method not implemented');
   }
 }
@@ -25,15 +25,15 @@ class MockLLMService extends LLMService {
     return;
   }
 
-  async generateReply(comment, style, userPrompt, maxLength = 140) {
+  async generateReply(comment, style, userPrompt, maxLength = 140, videoTitle = '') {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Mock responses based on style
     const responses = {
-      positive: "Thanks for sharing your perspective! Really appreciate your thoughtful comment. 👍",
-      constructive: "Interesting point! Have you also considered looking at it from alternative perspective? 🤔",
-      critical: "While I see your point, I respectfully disagree. Let's discuss further."
+      positive: `Thanks for sharing your thoughts on "${videoTitle}"! Really appreciate your thoughtful comment. 👍`,
+      constructive: `Interesting perspective on "${videoTitle}"! Have you also considered looking at it from another angle? 🤔`,
+      critical: `While I see your point about "${videoTitle}", I respectfully disagree. Let's discuss further.`
     };
 
     // Return appropriate response based on style
@@ -53,7 +53,7 @@ class OpenAIService extends LLMService {
     this.apiKey = apiKey;
   }
 
-  async generateReply(comment, style, userPrompt, maxLength = 140) {
+  async generateReply(comment, style, userPrompt, maxLength = 140, videoTitle = '') {
     try {
       // Validate inputs
       if (!comment) throw new Error('Comment is required');
@@ -71,13 +71,15 @@ class OpenAIService extends LLMService {
 
       const systemPrompt = stylePrompts[style] || stylePrompts.constructive;
 
-      // Construct the user prompt
-      let promptText = `Please generate a reply to this YouTube comment: "${comment}"`;
+      // Construct the user prompt with video context
+      let promptText = videoTitle
+        ? `Please generate a reply to this YouTube comment on the video "${videoTitle}": "${comment}"`
+        : `Please generate a reply to this YouTube comment: "${comment}"`;
+
       if (userPrompt) {
         promptText += `\nConsider these points in your response: ${userPrompt}`;
       }
       promptText += `\nKeep the response under ${maxLength} characters.`;
-
 
       // Make API request
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
