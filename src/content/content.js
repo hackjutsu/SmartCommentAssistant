@@ -77,8 +77,7 @@ function createPanel() {
   const header = document.createElement('div');
   header.className = 'panel-header';
   header.innerHTML = `
-    Smart Comment Assistant
-    <span class="panel-status">${isExtensionActive ? '(Active)' : '(Inactive)'}</span>
+    <div class="header-content">Smart Comment Assistant</div>
   `;
   panel.appendChild(header);
 
