@@ -528,9 +528,9 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
 
 .generated-reply h3 {
   margin-bottom: 12px !important;
-  font-size: 16px !important;
+  font-size: 14px !important;
   font-weight: 500 !important;
-  color: #0f0f0f !important;
+  color: #030303 !important;
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
@@ -572,27 +572,36 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
 }
 
 .generated-reply .reply-box {
-  background-color: #f8f9fa !important;
-  border-radius: 8px !important;
-  padding: 16px !important;
   position: relative !important;
 }
 
-.generated-reply .reply-textarea {
+.generated-reply .prompt-input {
   width: 100% !important;
-  min-height: 120px !important;
-  padding: 0 !important;
-  border: none !important;
-  background: transparent !important;
+  padding: 8px 12px !important;
+  border: 1px solid #c4c4c4 !important;
+  border-radius: 4px !important;
   font-size: 14px !important;
-  line-height: 1.5 !important;
-  color: #0f0f0f !important;
+  line-height: 20px !important;
   resize: vertical !important;
+  min-height: 80px !important;
+  max-height: 300px !important;
   font-family: Roboto, Arial, sans-serif !important;
+  color: #0f0f0f !important;
+  background-color: #ffffff !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  display: block !important;
 }
 
-.generated-reply .reply-textarea:focus {
+.generated-reply .prompt-input:hover {
+  border-color: #909090 !important;
+}
+
+.generated-reply .prompt-input:focus {
   outline: none !important;
+  border-color: #065fd4 !important;
+  box-shadow: 0 0 0 1px #065fd4 !important;
 }
 
 .generated-reply .action-button:active {
