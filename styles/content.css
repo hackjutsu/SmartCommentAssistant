@@ -114,19 +114,17 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
 
 .panel-header {
   display: flex !important;
-  justify-content: center !important;
+  justify-content: space-between !important;
   align-items: center !important;
   padding: 12px 16px !important;
   background-color: #2196F3 !important;
-  color: white !important;
-  font-weight: 500 !important;
-  font-size: 16px !important;
   border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
 }
 
 .header-content {
-  text-align: center !important;
+  font-size: 16px !important;
   font-weight: 500 !important;
+  color: white !important;
 }
 
 .panel-close-button {
@@ -579,4 +577,40 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
 
 .generated-reply .action-success {
   background-color: #34a853 !important;
+}
+
+.refresh-button {
+  background: none !important;
+  border: none !important;
+  font-size: 16px !important;
+  cursor: pointer !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  color: white !important;
+  opacity: 0.9 !important;
+  transition: all 0.2s ease !important;
+}
+
+.refresh-button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  opacity: 1 !important;
+}
+
+.refresh-button.spinning {
+  animation: gentle-spin 0.8s ease-in-out !important;
+  pointer-events: none !important;
+}
+
+@keyframes gentle-spin {
+  0% {
+    transform: rotate(0deg);
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  100% {
+    transform: rotate(360deg);
+    opacity: 0.9;
+  }
 }

@@ -86,6 +86,7 @@ function createPanel() {
   header.className = 'panel-header';
   header.innerHTML = `
     <div class="header-content">Smart Comment Assistant</div>
+    <button class="refresh-button" title="Refresh comment selection">🔄</button>
   `;
   panel.appendChild(header);
 
@@ -234,6 +235,19 @@ function createPanel() {
   const styleOptions = panel.querySelector('.style-options');
   if (styleOptions) {
     styleOptions.addEventListener('click', handleStyleSelection);
+  }
+
+  const refreshButton = panel.querySelector('.refresh-button');
+  if (refreshButton) {
+    refreshButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      const button = e.currentTarget;
+      button.classList.add('spinning');
+      initializeCommentSelection();
+      setTimeout(() => {
+        button.classList.remove('spinning');
+      }, 1000);
+    });
   }
 
   const generateButton = panel.querySelector('.generate-button');
