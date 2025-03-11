@@ -32,6 +32,13 @@ async function initializeLLMService() {
 
     if (serviceSelect) {
       serviceSelect.value = serviceType;
+      // Update OpenAI option text to show current model
+      if (serviceType === 'openai' && llmService.model) {
+        const option = serviceSelect.querySelector('option[value="openai"]');
+        if (option) {
+          option.textContent = `OpenAI (${llmService.model})`;
+        }
+      }
     }
     if (apiKeyInput) {
       apiKeyInput.value = apiKey || '';
@@ -152,7 +159,7 @@ function createPanel() {
     <div class="service-controls">
       <select class="service-select">
         <option value="mock">Mock Service (Testing)</option>
-        <option value="openai">OpenAI</option>
+        <option value="openai">OpenAI (GPT-3.5-turbo)</option>
       </select>
       <div class="api-key-input">
         <input type="password"
@@ -809,6 +816,15 @@ async function handleServiceChange(event) {
     if (!llmService || llmService.type !== serviceType) {
       // Only create new service if type is different
       llmService = LLMServiceFactory.createService(serviceType, {});
+
+      // Update dropdown text to show current model if it's OpenAI
+      if (serviceType === 'openai' && llmService.model) {
+        const option = event.target.querySelector('option[value="openai"]');
+        if (option) {
+          option.textContent = `OpenAI (${llmService.model})`;
+        }
+      }
+
       // Set API key after creation if one exists
       if (apiKey) {
         llmService.setApiKey(apiKey);

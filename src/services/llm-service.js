@@ -47,10 +47,15 @@ class OpenAIService extends LLMService {
     super();
     this.type = 'openai';
     this.apiKey = apiKey;
+    this.model = "gpt-3.5-turbo";  // Specify the model name
   }
 
   setApiKey(apiKey) {
     this.apiKey = apiKey;
+  }
+
+  setModel(model) {
+    this.model = model;
   }
 
   async generateReply(comment, style, userPrompt, maxLength = 140, videoTitle = '') {
@@ -89,7 +94,7 @@ class OpenAIService extends LLMService {
           'Authorization': `Bearer ${this.apiKey}`
         },
         body: JSON.stringify({
-          model: "gpt-3.5-turbo",
+          model: this.model,  // Use the specified model
           messages: [
             {
               role: "system",
