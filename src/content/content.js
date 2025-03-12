@@ -285,7 +285,40 @@ function createPanel() {
       e.preventDefault();
       const button = e.currentTarget;
       button.classList.add('spinning');
-      initializeCommentSelection();
+
+      // First, remove all existing selectable states
+      const selectableElements = document.querySelectorAll('.selectable, .selected');
+      selectableElements.forEach(element => {
+        element.classList.remove('selectable', 'selected');
+        const clickHandler = element._clickHandler;
+        if (clickHandler) {
+          element.removeEventListener('click', clickHandler);
+          delete element._clickHandler;
+        }
+      });
+
+      // Process all existing comments immediately
+      const commentThreads = document.querySelectorAll('ytd-comment-thread-renderer');
+      commentThreads.forEach(thread => {
+        // Make main comment selectable
+        const mainComment = thread.querySelector('ytd-comment-view-model#comment');
+        if (mainComment) {
+          makeCommentSelectable(mainComment);
+        }
+
+        // Make replies selectable
+        const repliesSection = thread.querySelector('ytd-comment-replies-renderer');
+        if (repliesSection) {
+          const replies = repliesSection.querySelectorAll('ytd-comment-view-model.style-scope.ytd-comment-replies-renderer');
+          replies.forEach(reply => {
+            makeCommentSelectable(reply);
+          });
+        }
+      });
+
+      // Re-initialize observers
+      setupContentsObserver();
+
       setTimeout(() => {
         button.classList.remove('spinning');
       }, 1000);
