@@ -2,6 +2,8 @@
 
 A Chrome extension that helps users generate YouTube comment replies using OpenAI's API. This tool assists content creators and active commenters in crafting contextually appropriate responses to YouTube comments.
 
+![](./assets/screenshot_1.jpg)
+
 ## Features
 
 - Automatic activation on YouTube
