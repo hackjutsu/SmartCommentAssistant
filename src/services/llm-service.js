@@ -8,7 +8,7 @@ class LLMService {
     throw new Error('Method not implemented');
   }
 
-  async generateReply(comment, style, userPrompt, maxLength = 140, videoTitle = '') {
+  async generateReply(comment, style, userPrompt, maxLength = 500, videoTitle = '') {
     throw new Error('Method not implemented');
   }
 }
@@ -25,7 +25,7 @@ class MockLLMService extends LLMService {
     return;
   }
 
-  async generateReply(comment, style, userPrompt, maxLength = 140, videoTitle = '') {
+  async generateReply(comment, style, userPrompt, maxLength = 500, videoTitle = '') {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
 
@@ -60,7 +60,7 @@ class OpenAIService extends LLMService {
     this.model = model;
   }
 
-  async generateReply(comment, style, userPrompt, maxLength = 140, videoTitle = '') {
+  async generateReply(comment, style, userPrompt, maxLength = 500, videoTitle = '') {
     try {
       // Validate inputs
       if (!comment) throw new Error('Comment is required');
