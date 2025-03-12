@@ -78,7 +78,8 @@ class OpenAIService extends LLMService {
         'super-disagree': "You are a sarcastic and critical commenter. Express strong disagreement with the comment using rhetorical questions and witty remarks, while still maintaining some level of civility."
       };
 
-      const systemPrompt = stylePrompts[style] || stylePrompts.neutral;
+      const basePrompt = "Always respond in the same language as the original comment, matching its linguistic style and cultural context.";
+      const systemPrompt = `${stylePrompts[style] || stylePrompts.neutral}\n\n${basePrompt}`;
 
       // Construct the user prompt with video context
       let promptText = videoTitle
@@ -88,7 +89,7 @@ class OpenAIService extends LLMService {
       if (userPrompt) {
         promptText += `\nConsider these points in your response: ${userPrompt}`;
       }
-      promptText += `\nKeep the response under ${maxLength} characters.`;
+      promptText += `\nKeep the response under ${maxLength} characters and maintain the same language, tone, and cultural context as the original comment.`;
 
       // Make API request
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
