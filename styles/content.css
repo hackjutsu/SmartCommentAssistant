@@ -725,3 +725,43 @@ ytd-comment-view-model.selectable tp-yt-paper-button {
   color: #1a73e8 !important;
   font-weight: 500 !important;
 }
+
+/* Toast Notifications */
+.toast-notification {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  border-radius: 8px;
+  color: #333;
+  font-size: 14px;
+  width: calc(100% - 64px);
+  max-width: 100%;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.toast-notification.show {
+  opacity: 1;
+}
+
+.toast-success {
+  background-color: #FFF9C4;
+}
+
+.toast-error {
+  background-color: #FFEBEE;
+}
+
+.toast-info {
+  background-color: #FFF9C4;
+}
+
+.toast-warning {
+  background-color: #FFF9C4;
+}

@@ -946,7 +946,7 @@ async function handleSaveApiKey() {
   const apiKey = apiKeyInput.value.trim();
 
   if (!apiKey) {
-    alert('Please enter an API key');
+    showToast('Please enter an API key', 'error');
     return;
   }
 
@@ -959,12 +959,12 @@ async function handleSaveApiKey() {
       llmService.setApiKey(apiKey);
     }
 
-    alert('API key saved successfully');
+    showToast('API key saved successfully', 'success');
     // Update generate button state after saving API key
     updateGenerateButtonState();
   } catch (error) {
     console.error('Failed to save API key:', error);
-    alert('Failed to save API key. Please try again.');
+    showToast('Failed to save API key. Please try again.', 'error');
   }
 }
 
@@ -987,9 +987,34 @@ async function handleClearApiKey() {
     // Update generate button state
     updateGenerateButtonState();
 
-    alert('API key cleared successfully');
+    showToast('API key cleared successfully', 'success');
   } catch (error) {
     console.error('Failed to clear API key:', error);
-    alert('Failed to clear API key. Please try again.');
+    showToast('Failed to clear API key. Please try again.', 'error');
   }
+}
+
+// Helper function to show toast notifications
+function showToast(message, type = 'info') {
+  const panel = document.getElementById('smart-comment-panel');
+
+  // Create toast element if it doesn't exist
+  let toast = panel.querySelector('.toast-notification');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    panel.appendChild(toast);
+  }
+
+  // Set message and style based on type
+  toast.textContent = message;
+  toast.className = `toast-notification toast-${type}`;
+
+  // Show the toast
+  toast.classList.add('show');
+
+  // Hide after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 3000);
 }
