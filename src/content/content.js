@@ -161,6 +161,23 @@ function createPanel() {
   const serviceSection = document.createElement('div');
   serviceSection.className = 'service-section';
   serviceSection.innerHTML = `
+    <h3>Response Settings</h3>
+    <div class="length-control">
+      <label for="length-slider">Response Length: <span class="length-value">140</span> characters</label>
+      <input
+        type="range"
+        id="length-slider"
+        class="length-slider"
+        min="140"
+        max="500"
+        value="140"
+        step="10"
+      >
+      <div class="length-labels">
+        <span>140</span>
+        <span>500</span>
+      </div>
+    </div>
     <h3>LLM Service</h3>
     <div class="service-controls">
       <select class="service-select">
@@ -182,6 +199,15 @@ function createPanel() {
     </div>
   `;
   content.appendChild(serviceSection);
+
+  // Add event listener for length slider
+  const lengthSlider = serviceSection.querySelector('#length-slider');
+  const lengthValue = serviceSection.querySelector('.length-value');
+  if (lengthSlider && lengthValue) {
+    lengthSlider.addEventListener('input', (e) => {
+      lengthValue.textContent = e.target.value;
+    });
+  }
 
   // Add generate button section
   const generateSection = document.createElement('div');
@@ -772,13 +798,17 @@ async function handleGenerate() {
   // Get user prompt
   const userPrompt = panel.querySelector('.prompt-input:not(.comment-input)').value.trim();
 
+  // Get selected length
+  const lengthSlider = panel.querySelector('#length-slider');
+  const maxLength = lengthSlider ? parseInt(lengthSlider.value) : 140;
+
   try {
     // Disable button and show loading state
     generateButton.disabled = true;
     generateButton.innerHTML = '<span class="generate-icon">⏳</span><span class="generate-label">Generating...</span>';
 
-    // Generate response with video title
-    const reply = await llmService.generateReply(commentText, style, userPrompt, undefined, videoTitle);
+    // Generate response with video title and selected length
+    const reply = await llmService.generateReply(commentText, style, userPrompt, maxLength, videoTitle);
 
     // Show generated reply
     replyTextarea.value = reply;
