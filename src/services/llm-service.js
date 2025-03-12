@@ -87,9 +87,13 @@ class OpenAIService extends LLMService {
         : `Please generate a reply to this YouTube comment: "${comment}"`;
 
       if (userPrompt) {
-        promptText += `\nConsider these points in your response: ${userPrompt}`;
+        promptText += `\nSupport and extend on the points here: ${userPrompt}`;
       }
-      promptText += `\nKeep the response under ${maxLength} characters and maintain the same language, tone, and cultural context as the original comment.`;
+      promptText += `\nKeep the response close to ${maxLength} characters and maintain the same language, tone, and cultural context as the original comment.`;
+
+      // log the system and user prompts
+      console.log('System Prompt:', systemPrompt);
+      console.log('User Prompt:', promptText);
 
       // Make API request
       const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -130,10 +134,7 @@ class OpenAIService extends LLMService {
         throw new Error('No reply generated');
       }
 
-      // Ensure the reply doesn't exceed maxLength
-      return generatedReply.length > maxLength
-        ? generatedReply.substring(0, maxLength - 3) + '...'
-        : generatedReply;
+      return generatedReply;
 
     } catch (error) {
       console.error('OpenAI API Error:', error);

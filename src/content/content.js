@@ -163,7 +163,7 @@ function createPanel() {
   serviceSection.innerHTML = `
     <h3>Response Settings</h3>
     <div class="length-control">
-      <label for="length-slider">Response Length: <span class="length-value">140</span> characters</label>
+      <label for="length-slider">Response Length: <span class="length-value">140</span> char</label>
       <input
         type="range"
         id="length-slider"
